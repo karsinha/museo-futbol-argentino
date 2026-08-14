@@ -1,0 +1,28 @@
+{# Escudo de club reutilizable #}
+<a
+  href="{{ url_for('club_page', slug=team.slug) }}"
+  class="shield-link group relative flex h-16 w-16 items-center justify-center rounded-full border-2 border-museum-border bg-museum-surface shadow-lg transition-all duration-300 ease-out hover:scale-110 hover:border-museum-gold hover:shadow-[0_0_24px_rgba(201,162,39,0.35)] sm:h-[4.5rem] sm:w-[4.5rem]"
+  style="--club-primary: {{ team.primary_color }}; --club-secondary: {{ team.secondary_color }};"
+  title="{{ team.name }}"
+  aria-label="Entrar a {{ team.name }}"
+>
+  {% if team.shield_path %}
+  <img
+    src="{{ url_for('static', path=team.shield_path) }}"
+    alt="Escudo de {{ team.name }}"
+    class="h-10 w-10 object-contain transition-transform duration-300 group-hover:scale-105 sm:h-12 sm:w-12"
+    loading="lazy"
+  />
+  {% else %}
+  <span
+    class="flex h-10 w-10 items-center justify-center rounded-full text-[10px] font-bold sm:h-12 sm:w-12 sm:text-xs"
+    style="background: {{ team.primary_color }}; color: {{ team.secondary_color }};"
+  >
+    {{ team.name[:3] | upper }}
+  </span>
+  {% endif %}
+
+  <span class="pointer-events-none absolute -bottom-7 left-1/2 w-max max-w-[5rem] -translate-x-1/2 truncate text-center text-[10px] font-medium text-gray-400 opacity-0 transition-opacity duration-300 group-hover:opacity-100 sm:text-xs">
+    {{ team.name }}
+  </span>
+</a>

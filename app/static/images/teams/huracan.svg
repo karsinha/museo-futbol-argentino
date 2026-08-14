@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 72" role="img">
+  <path d="M32 2 L58 14 L58 38 C58 54 32 70 32 70 C32 70 6 54 6 38 L6 14 Z"
+        fill="#ffffff" stroke="#ed1c24" stroke-width="2"/>
+  <text x="32" y="42" text-anchor="middle" fill="#ed1c24"
+        font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="700">HUR</text>
+</svg>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ app_name | default("Museo del Fútbol Argentino") }}{% endblock %}</title>
+
+  {# Tailwind CSS vía CDN — suficiente para empezar; luego podemos compilar #}
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            museum: {
+              bg: "#0a0a0f",
+              surface: "#12121a",
+              border: "#1e1e2e",
+              muted: "#6b7280",
+              gold: "#c9a227",
+              "gold-light": "#e8c547",
+            },
+          },
+          fontFamily: {
+            display: ["Georgia", "Cambria", "Times New Roman", "serif"],
+            sans: ["Inter", "system-ui", "sans-serif"],
+          },
+        },
+      },
+    };
+  </script>
+
+  {# HTMX — interacciones sin recargar la página completa #}
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+
+  {# Estilos propios del museo #}
+  <link rel="stylesheet" href="{{ url_for('static', path='css/main.css') }}">
+
+  {% block head %}{% endblock %}
+</head>
+<body class="min-h-full bg-museum-bg text-gray-100 font-sans antialiased">
+  {% block body %}{% endblock %}
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

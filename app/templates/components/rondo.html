@@ -1,0 +1,26 @@
+{# Rondó circular con escudos alrededor del centro #}
+<div class="rondo-wrapper mt-12 sm:mt-16">
+  <div
+    class="rondo"
+    style="--total: {{ teams | length }};"
+    role="navigation"
+    aria-label="Seleccionar club"
+  >
+    {# Hub central #}
+    <div class="rondo-hub">
+      <span class="text-[10px] font-medium uppercase tracking-[0.25em] text-museum-gold sm:text-xs">
+        Elegí
+      </span>
+      <span class="font-display text-lg font-bold text-white sm:text-xl">
+        un club
+      </span>
+    </div>
+
+    {# Escudos distribuidos en círculo #}
+    {% for team in teams %}
+    <div class="rondo-item" style="--i: {{ loop.index0 }};">
+      {% include "components/shield-link.html" %}
+    </div>
+    {% endfor %}
+  </div>
+</div>

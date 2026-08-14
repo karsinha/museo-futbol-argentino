@@ -1,0 +1,332 @@
+{% extends "base.html" %}
+
+{% block title %}{{ team.name }} · {{ app_name }}{% endblock %}
+
+{% block body %}
+<main
+  class="club-page-layout"
+  style="--primary: {{ team.primary_color }}; --secondary: {{ team.secondary_color }}; --accent: {{ team.accent_color }};"
+>
+  {# Header fijo con backlink #}
+  <header class="club-topbar">
+    <a href="{{ url_for('home') }}" class="club-backlink">
+      ← Volver al museo
+    </a>
+  </header>
+
+  {# Contenedor 2-col: main + sidebar #}
+  <div class="club-container">
+    {# MAIN CONTENT COLUMN #}
+    <article class="club-main">
+      {# Hero Section #}
+      <section class="club-hero">
+        <div class="club-hero__panel">
+          <div class="club-hero__identity">
+            {% if team.shield_path %}
+            <div class="club-hero__shield">
+              <img
+                src="{{ url_for('static', path=team.shield_path) }}"
+                alt="Escudo de {{ team.name }}"
+              />
+            </div>
+            {% else %}
+            <div class="club-hero__shield club-hero__shield--fallback" style="background: {{ team.primary_color }}; color: {{ team.secondary_color }};">
+              {{ team.name[:3] | upper }}
+            </div>
+            {% endif %}
+
+            <div class="club-hero__text">
+              <p class="club-kicker">Club</p>
+              <h1>{{ team.name }}</h1>
+              <p class="club-subtitle">{{ team.city }} · Fundación {{ team.founded_year }}</p>
+            </div>
+          </div>
+
+          <div class="club-meta">
+            <div class="club-meta__item">
+              <span class="label">Ciudad</span>
+              <strong>{{ team.city }}</strong>
+            </div>
+            <div class="club-meta__item">
+              <span class="label">Estadio</span>
+              <strong>{{ stadium_name }}</strong>
+            </div>
+            <div class="club-meta__item">
+              <span class="label">Temporada</span>
+              <strong>2025</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {# Dashboard Stats #}
+      <section class="club-dashboard">
+        <div class="club-dashboard__grid">
+          <article class="stat-card stat-card--gold">
+            <span class="stat-card__label">Títulos</span>
+            <strong>{{ trophies_count }}</strong>
+            <small>Historias ganadas</small>
+          </article>
+
+          <article class="stat-card">
+            <span class="stat-card__label">Jugadores</span>
+            <strong>{{ players_count }}</strong>
+            <small>Fichas del plantel</small>
+          </article>
+
+          <article class="stat-card">
+            <span class="stat-card__label">Ídolos</span>
+            <strong>{{ idols_count }}</strong>
+            <small>Figuras históricas</small>
+          </article>
+
+          <article class="stat-card">
+            <span class="stat-card__label">Rivales</span>
+            <strong>3</strong>
+            <small>Clásicos y duelos</small>
+          </article>
+        </div>
+
+        <div class="club-panels">
+          <article class="panel panel--wide">
+            <div class="panel__header">
+              <span>Resumen</span>
+              <span class="panel__tag">Ficha</span>
+            </div>
+            <p>
+              El club forma parte del archivo vivo del fútbol argentino. Esta vista será el punto de partida para la historia, el estadio, los títulos y el repertorio visual del equipo.
+            </p>
+          </article>
+
+          <article class="panel">
+            <div class="panel__header">
+              <span>Perfil</span>
+              <span class="panel__tag">Club</span>
+            </div>
+            <ul class="key-list">
+              <li><span>Fundación</span><strong>{{ team.founded_year }}</strong></li>
+              <li><span>Ciudad</span><strong>{{ team.city }}</strong></li>
+              <li><span>Estadio</span><strong>{{ stadium_name }}</strong></li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      {# Standings - 2 ZONAS #}
+      {% if standings %}
+      <section class="standings-block">
+        <div class="standings-header">
+          <div>
+            <p class="club-kicker">Actualidad</p>
+            <h2>{{ competition }}</h2>
+          </div>
+          <span class="standings-season">{{ season }}</span>
+        </div>
+
+        <!-- ZONA A -->
+        <div class="zone-container">
+          <h3 class="zone-title">Zona A</h3>
+          <div class="standings-table-wrap">
+            <table class="standings-table">
+              <thead>
+                <tr>
+                  <th class="pos-col">#</th>
+                  <th class="team-col">Equipo</th>
+                  <th>PJ</th>
+                  <th>G</th>
+                  <th>E</th>
+                  <th>P</th>
+                  <th>GF</th>
+                  <th>GC</th>
+                  <th>DG</th>
+                  <th>PTS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% set zona_a = standings | selectattr("zone", "equalto", "A") | list %}
+                {% for row in zona_a | sort(attribute="position") %}
+                <tr class="{% if row.team_id == team.id %}is-current-team{% endif %}">
+                  <td class="pos-cell">{{ row.position }}</td>
+                  <td class="team-cell">
+                    <div class="team-cell__inner">
+                      {% if row.team and row.team.shield_path %}
+                      <img src="{{ url_for('static', path=row.team.shield_path) }}" alt="Escudo de {{ row.team.name }}" />
+                      {% endif %}
+                      <span>{{ row.team.name if row.team else 'Club' }}</span>
+                    </div>
+                  </td>
+                  <td>{{ row.played }}</td>
+                  <td>{{ row.won }}</td>
+                  <td>{{ row.drawn }}</td>
+                  <td>{{ row.lost }}</td>
+                  <td>{{ row.goals_for }}</td>
+                  <td>{{ row.goals_against }}</td>
+                  <td>{{ row.goal_difference }}</td>
+                  <td class="pts-cell"><strong>{{ row.points }}</strong></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ZONA B -->
+        <div class="zone-container">
+          <h3 class="zone-title">Zona B</h3>
+          <div class="standings-table-wrap">
+            <table class="standings-table">
+              <thead>
+                <tr>
+                  <th class="pos-col">#</th>
+                  <th class="team-col">Equipo</th>
+                  <th>PJ</th>
+                  <th>G</th>
+                  <th>E</th>
+                  <th>P</th>
+                  <th>GF</th>
+                  <th>GC</th>
+                  <th>DG</th>
+                  <th>PTS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% set zona_b = standings | selectattr("zone", "equalto", "B") | list %}
+                {% for row in zona_b | sort(attribute="position") %}
+                <tr class="{% if row.team_id == team.id %}is-current-team{% endif %}">
+                  <td class="pos-cell">{{ row.position }}</td>
+                  <td class="team-cell">
+                    <div class="team-cell__inner">
+                      {% if row.team and row.team.shield_path %}
+                      <img src="{{ url_for('static', path=row.team.shield_path) }}" alt="Escudo de {{ row.team.name }}" />
+                      {% endif %}
+                      <span>{{ row.team.name if row.team else 'Club' }}</span>
+                    </div>
+                  </td>
+                  <td>{{ row.played }}</td>
+                  <td>{{ row.won }}</td>
+                  <td>{{ row.drawn }}</td>
+                  <td>{{ row.lost }}</td>
+                  <td>{{ row.goals_for }}</td>
+                  <td>{{ row.goals_against }}</td>
+                  <td>{{ row.goal_difference }}</td>
+                  <td class="pts-cell"><strong>{{ row.points }}</strong></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      {% endif %}
+
+      {# Fixtures / Calendar #}
+      {% if upcoming_matches %}
+      <section class="fixtures-block">
+        <div class="fixtures-header">
+          <div>
+            <p class="club-kicker">Próximo partido</p>
+            <h2>Calendario</h2>
+          </div>
+          <span class="fixtures-pill">{{ upcoming_matches | length }} encuentros</span>
+        </div>
+
+        <div class="fixtures-grid">
+          {% for match in upcoming_matches %}
+            {% set opponent = match.away_team if match.home_team_id == team.id else match.home_team %}
+            {% set is_home = match.home_team_id == team.id %}
+            <article class="fixture-card">
+              <div class="fixture-card__meta">
+                <span>{{ match.competition }}</span>
+                <span>{{ match.round_label or 'Fecha' }}</span>
+              </div>
+
+              <div class="fixture-card__teams">
+                <div class="fixture-card__team fixture-card__team--current">
+                  {% if team.shield_path %}
+                  <img src="{{ url_for('static', path=team.shield_path) }}" alt="Escudo de {{ team.name }}" />
+                  {% endif %}
+                  <span>{{ team.name }}</span>
+                </div>
+
+                <span class="fixture-card__versus">vs</span>
+
+                <div class="fixture-card__team">
+                  {% if opponent and opponent.shield_path %}
+                  <img src="{{ url_for('static', path=opponent.shield_path) }}" alt="Escudo de {{ opponent.name }}" />
+                  {% endif %}
+                  <span>{{ opponent.name if opponent else 'Rival' }}</span>
+                </div>
+              </div>
+
+              <div class="fixture-card__info">
+                <span>{{ match.scheduled_at.strftime('%d %b %Y') }}</span>
+                <span>{{ match.scheduled_at.strftime('%H:%M') }} hs</span>
+                <span>{{ 'Local' if is_home else 'Visitante' }}</span>
+              </div>
+
+              <div class="fixture-card__location">
+                <span>{{ match.venue or stadium_name }}</span>
+              </div>
+            </article>
+          {% endfor %}
+      {# History Panel - Removed, now separate pages #}
+    </article>
+
+    {# SIDEBAR NAVIGATION #}
+    <aside class="club-sidebar">
+      <nav class="club-sidebar__nav">
+        <p class="club-sidebar__title">Historia & Datos</p>
+        
+        <a href="/club/{{ team.slug }}/history" class="club-sidebar__link">
+          <span class="icon">📖</span>
+          <span>Historia</span>
+        </a>
+
+        <a href="/club/{{ team.slug }}/rivals" class="club-sidebar__link">
+          <span class="icon">⚔️</span>
+          <span>Rivales</span>
+        </a>
+
+        <a href="/club/{{ team.slug }}/stadium" class="club-sidebar__link">
+          <span class="icon">🏟️</span>
+          <span>Estadio</span>
+        </a>
+
+        <a href="/club/{{ team.slug }}/trophies" class="club-sidebar__link">
+          <span class="icon">🏆</span>
+          <span>Títulos</span>
+        </a>
+
+        <a href="/club/{{ team.slug }}/international" class="club-sidebar__link">
+          <span class="icon">🌎</span>
+          <span>Internacional</span>
+        </a>
+
+        <a href="/club/{{ team.slug }}/kits" class="club-sidebar__link">
+          <span class="icon">👕</span>
+          <span>Camisetas</span>
+        </a>
+
+        <a href="/club/{{ team.slug }}/squad" class="club-sidebar__link">
+          <span class="icon">⚽</span>
+          <span>Plantel</span>
+        </a>
+
+        <a href="/club/{{ team.slug }}/idols" class="club-sidebar__link">
+          <span class="icon">⭐</span>
+          <span>Ídolos</span>
+        </a>
+      </nav>
+    </aside>
+  </div>
+</main>
+
+<script>
+{# Ya no necesitamos HTMX, las secciones son páginas completas #}
+console.log('Club page loaded with sidebar navigation');
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,150 @@
+{% if section == 'historia' %}
+  <article class="history-panel history-panel--featured">
+    <div class="panel__header">
+      <span>Historia</span>
+      <span class="panel__tag">Archivo</span>
+    </div>
+    <p>
+      {{ team.name }} representa la continuidad de una identidad futbolística marcada por la ciudad, la rivalidad, la tradición y la capacidad de reinventarse sin perder la memoria colectiva.
+    </p>
+    <p>
+      Desde sus orígenes, el club se consolidó como una institución con una fuerte impronta social, emocional y competitiva, y hoy sigue siendo una referencia del fútbol argentino.
+    </p>
+  </article>
+{% elif section == 'rivales' %}
+  <article class="history-panel">
+    <div class="panel__header">
+      <span>Rivales</span>
+      <span class="panel__tag">Clásicos</span>
+    </div>
+    {% if team.rivalries %}
+      <ul class="history-list">
+        {% for rivalry in team.rivalries %}
+          <li>
+            <strong>{{ rivalry.rival_team.name if rivalry.rival_team else 'Rival' }}</strong>
+            <span>{{ rivalry.wins }}V · {{ rivalry.draws }}E · {{ rivalry.losses }}D</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>La estadística de clásicos aún se está perfilando en el museo.</p>
+    {% endif %}
+  </article>
+{% elif section == 'estadio' %}
+  <article class="history-panel">
+    <div class="panel__header">
+      <span>Estadio</span>
+      <span class="panel__tag">Catedral</span>
+    </div>
+    {% if team.stadium %}
+      <h3>{{ team.stadium.name }}</h3>
+      <ul class="history-list">
+        <li><strong>Capacidad</strong><span>{{ team.stadium.capacity or 'Sin dato' }}</span></li>
+        <li><strong>Ubicación</strong><span>{{ team.stadium.location or team.city }}</span></li>
+        <li><strong>Inauguración</strong><span>{{ team.stadium.inaugurated_year or 'Sin dato' }}</span></li>
+      </ul>
+    {% else %}
+      <p>El estadio del club aún no está cargado en la base del museo.</p>
+    {% endif %}
+  </article>
+{% elif section == 'titulos' %}
+  <article class="history-panel">
+    <div class="panel__header">
+      <span>Títulos</span>
+      <span class="panel__tag">Palmarés</span>
+    </div>
+    {% if team.trophies %}
+      <ul class="history-list">
+        {% for trophy in team.trophies %}
+          <li>
+            <strong>{{ trophy.name }}</strong>
+            <span>{{ trophy.year }} · {{ trophy.competition or trophy.trophy_type.value }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>Aún no se registraron títulos para este club en la base del museo.</p>
+    {% endif %}
+  </article>
+{% elif section == 'internacional' %}
+  <article class="history-panel">
+    <div class="panel__header">
+      <span>Internacional</span>
+      <span class="panel__tag">Sudamérica</span>
+    </div>
+    {% set international_trophies = team.trophies | selectattr('trophy_type.value', 'equalto', 'copa_internacional') | list %}
+    {% if international_trophies %}
+      <ul class="history-list">
+        {% for trophy in international_trophies %}
+          <li>
+            <strong>{{ trophy.name }}</strong>
+            <span>{{ trophy.year }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No aparecen copas internacionales en la base todavía, pero la sección está preparada para recibirlas.</p>
+    {% endif %}
+  </article>
+{% elif section == 'camisetas' %}
+  <article class="history-panel">
+    <div class="panel__header">
+      <span>Camisetas</span>
+      <span class="panel__tag">Identidad</span>
+    </div>
+    <div class="color-palette">
+      <span style="background: {{ team.primary_color }};"></span>
+      <span style="background: {{ team.secondary_color }};"></span>
+      <span style="background: {{ team.accent_color }};"></span>
+    </div>
+    <p>
+      Los colores del club definen gran parte de la narrativa visual del museo: una paleta que comunica tradición, fuerza y continuidad histórica.
+    </p>
+  </article>
+{% elif section == 'plantel' %}
+  <article class="history-panel">
+    <div class="panel__header">
+      <span>Plantel</span>
+      <span class="panel__tag">Actual</span>
+    </div>
+    {% if team.players %}
+      <ul class="history-list">
+        {% for player in team.players[:6] %}
+          <li>
+            <strong>{{ player.name }}</strong>
+            <span>{{ player.position or 'Jugador' }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>El plantel del club todavía no está cargado en la base de datos del museo.</p>
+    {% endif %}
+  </article>
+{% elif section == 'idolos' %}
+  <article class="history-panel">
+    <div class="panel__header">
+      <span>Ídolos</span>
+      <span class="panel__tag">Leyendas</span>
+    </div>
+    {% if team.idols %}
+      <ul class="history-list">
+        {% for idol in team.idols %}
+          <li>
+            <strong>{{ idol.name }}</strong>
+            <span>{{ idol.period_label or 'Historia' }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>La galería de ídolos del club se completará más adelante.</p>
+    {% endif %}
+  </article>
+{% else %}
+  <article class="history-panel history-panel--featured">
+    <div class="panel__header">
+      <span>Historia</span>
+      <span class="panel__tag">Archivo</span>
+    </div>
+    <p>Esta vista de archivo aún se está desarrollando para el club.</p>
+  </article>
+{% endif %}
