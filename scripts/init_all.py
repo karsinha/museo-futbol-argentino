@@ -3,9 +3,13 @@
 Script maestro que ejecuta toda la inicialización de datos del museo.
 
 Orden:
-1. seed_teams.py      → Equipos, escudos, standings de ejemplo
-2. seed_trophies.py   → Palmarés reales históricos
-3. scrapers.py        → Actualizar standings y fixtures actuales
+1. seed_teams.py       → Equipos, escudos, standings de ejemplo
+2. seed_trophies.py    → Palmarés reales históricos
+3. seed_stadiums.py    → Datos reales de estadios
+4. seed_idols.py       → Ídolos históricos reales
+5. seed_rivalries.py   → Clásicos históricos (requiere seed_teams.py primero)
+6. seed_players.py     → Plantel de ejemplo (placeholder)
+7. scrapers.py         → Actualizar standings y fixtures actuales
 """
 
 from __future__ import annotations
@@ -41,6 +45,10 @@ def main() -> int:
     scripts = [
         "seed_teams.py",
         "seed_trophies.py",
+        "seed_stadiums.py",
+        "seed_idols.py",
+        "seed_rivalries.py",
+        "seed_players.py",
         "scrapers.py",
     ]
 

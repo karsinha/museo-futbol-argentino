@@ -1,268 +1,9 @@
-<!DOCTYPE html>
-<html lang="es" class="h-full">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ team.name }} · {{ title }} · Museo del Fútbol Argentino</title>
+{% extends "base.html" %}
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            museum: {
-              bg: "#0a0a0f",
-              surface: "#12121a",
-              border: "#1e1e2e",
-              muted: "#6b7280",
-              gold: "#c9a227",
-              "gold-light": "#e8c547",
-            },
-          },
-          fontFamily: {
-            display: ["Georgia", "Cambria", "Times New Roman", "serif"],
-            sans: ["Inter", "system-ui", "sans-serif"],
-          },
-        },
-      },
-    };
-  </script>
+{% block title %}{{ team.name }} · {{ title }} · {{ app_name }}{% endblock %}
 
-  <link rel="stylesheet" href="http://127.0.0.1:8000/static/css/main.css">
-</head>
-<body class="min-h-full bg-museum-bg text-gray-100 font-sans antialiased">
-
-<main class="club-page" style="--primary: {{ team.primary_color }}; --secondary: {{ team.secondary_color }}; --accent: {{ team.accent_color }};">
-  <div class="club-topbar">
-    <a href="http://127.0.0.1:8000/club/{{ team.slug }}" class="club-backlink">
-      ← Volver a {{ team.name }}
-    </a>
-  </div>
-
-  <section class="club-hero">
-    <div class="club-hero__panel">
-      <div class="club-hero__identity">
-        <div class="club-hero__shield">
-          <img src="http://127.0.0.1:8000/static/images/teams/{{ team.slug }}.svg" alt="Escudo de {{ team.name }}" />
-        </div>
-        <div class="club-hero__text">
-          <p class="club-kicker">{{ title }}</p>
-          <h1>{{ team.name }}</h1>
-          <p class="club-subtitle">{{ team.city }} · Fundación {{ team.founded_year }}</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Navbar de secciones -->
-  <nav class="section-navbar">
-    <a href="http://127.0.0.1:8000/club/{{ team.slug }}/history" class="section-nav-link {% if section == 'history' %}active{% endif %}">
-      Historia
-    </a>
-    <a href="http://127.0.0.1:8000/club/{{ team.slug }}/rivals" class="section-nav-link {% if section == 'rivals' %}active{% endif %}">
-      Rivales
-    </a>
-    <a href="http://127.0.0.1:8000/club/{{ team.slug }}/stadium" class="section-nav-link {% if section == 'stadium' %}active{% endif %}">
-      Estadio
-    </a>
-    <a href="http://127.0.0.1:8000/club/{{ team.slug }}/trophies" class="section-nav-link {% if section == 'trophies' %}active{% endif %}">
-      Títulos
-    </a>
-    <a href="http://127.0.0.1:8000/club/{{ team.slug }}/international" class="section-nav-link {% if section == 'international' %}active{% endif %}">
-      Internacional
-    </a>
-    <a href="http://127.0.0.1:8000/club/{{ team.slug }}/kits" class="section-nav-link {% if section == 'kits' %}active{% endif %}">
-      Camisetas
-    </a>
-    <a href="http://127.0.0.1:8000/club/{{ team.slug }}/squad" class="section-nav-link {% if section == 'squad' %}active{% endif %}">
-      Plantel
-    </a>
-    <a href="http://127.0.0.1:8000/club/{{ team.slug }}/idols" class="section-nav-link {% if section == 'idols' %}active{% endif %}">
-      Ídolos
-    </a>
-  </nav>
-
-  <!-- Contenido de la sección -->
-  <section class="section-content">
-    {% if section == "history" %}
-      <article class="history-panel">
-        <div class="panel__header">
-          <span>Historia</span>
-          <span class="panel__tag">Trayectoria</span>
-        </div>
-        <p class="history-text">{{ team.name }} fue fundado en {{ team.founded_year }} y es uno de los clubes más emblemáticos del fútbol argentino.</p>
-      </article>
-
-    {% elif section == "rivals" %}
-      <article class="history-panel">
-        <div class="panel__header">
-          <span>Rivales</span>
-          <span class="panel__tag">Clásicos</span>
-        </div>
-        {% if team.rivalries %}
-          <ul class="history-list">
-            {% for rivalry in team.rivalries %}
-              <li>
-                <strong>{{ rivalry.rival_team.name }}</strong>
-                <span>{{ rivalry.wins }} G · {{ rivalry.draws }} E · {{ rivalry.losses }} P</span>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p class="text-museum-muted">Sin datos de rivalidades cargados.</p>
-        {% endif %}
-      </article>
-
-    {% elif section == "stadium" %}
-      <article class="history-panel">
-        <div class="panel__header">
-          <span>Estadio</span>
-          <span class="panel__tag">Casa</span>
-        </div>
-        {% if team.stadium %}
-          <div class="stadium-info">
-            <h3>{{ team.stadium.name }}</h3>
-            <p><strong>Capacidad:</strong> {{ team.stadium.capacity or "No registrada" }}</p>
-            <p><strong>Ubicación:</strong> {{ team.stadium.location }}</p>
-            <p><strong>Inauguración:</strong> {{ team.stadium.inauguration_year or "No registrada" }}</p>
-          </div>
-        {% else %}
-          <p class="text-museum-muted">Sin estadio registrado.</p>
-        {% endif %}
-      </article>
-
-    {% elif section == "trophies" %}
-      <article class="history-panel">
-        <div class="panel__header">
-          <span>Títulos</span>
-          <span class="panel__tag">Palmarés</span>
-        </div>
-        {% if team.trophies %}
-          <ul class="history-list">
-            {% for trophy in team.trophies | sort(attribute="year", reverse=True) %}
-              <li>
-                <strong>{{ trophy.name }}</strong>
-                <span>{{ trophy.year }} · {{ trophy.competition }}</span>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p class="text-museum-muted">Sin títulos cargados.</p>
-        {% endif %}
-      </article>
-
-    {% elif section == "international" %}
-      <article class="history-panel">
-        <div class="panel__header">
-          <span>Títulos Internacionales</span>
-          <span class="panel__tag">Copas</span>
-        </div>
-        {% set international_trophies = team.trophies | selectattr("trophy_type", "equalto", "copa_internacional") | list %}
-        {% if international_trophies %}
-          <ul class="history-list">
-            {% for trophy in international_trophies | sort(attribute="year", reverse=True) %}
-              <li>
-                <strong>{{ trophy.name }}</strong>
-                <span>{{ trophy.year }} · {{ trophy.competition }}</span>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p class="text-museum-muted">Sin títulos internacionales registrados.</p>
-        {% endif %}
-      </article>
-
-    {% elif section == "kits" %}
-      <article class="history-panel">
-        <div class="panel__header">
-          <span>Camisetas</span>
-          <span class="panel__tag">Colores</span>
-        </div>
-        <div class="color-palette">
-          <div class="color-swatch" style="background-color: {{ team.primary_color }};" title="Primario"></div>
-          <div class="color-swatch" style="background-color: {{ team.secondary_color }};" title="Secundario"></div>
-          <div class="color-swatch" style="background-color: {{ team.accent_color }};" title="Acento"></div>
-        </div>
-      </article>
-
-    {% elif section == "squad" %}
-      <article class="history-panel">
-        <div class="panel__header">
-          <span>Plantel</span>
-          <span class="panel__tag">Jugadores</span>
-        </div>
-        {% if team.players %}
-          <ul class="history-list">
-            {% for player in team.players | list | first(6) %}
-              <li>
-                <strong>{{ player.name }}</strong>
-                <span>{{ player.position }}</span>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p class="text-museum-muted">Sin plantel cargado.</p>
-        {% endif %}
-      </article>
-
-    {% elif section == "idols" %}
-      <article class="history-panel">
-        <div class="panel__header">
-          <span>Ídolos</span>
-          <span class="panel__tag">Leyendas</span>
-        </div>
-        {% if team.idols %}
-          <ul class="history-list">
-            {% for idol in team.idols %}
-              <li>
-                <strong>{{ idol.name }}</strong>
-                <span>{{ idol.period_label }}</span>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p class="text-museum-muted">Sin ídolos cargados.</p>
-        {% endif %}
-      </article>
-    {% endif %}
-  </section>
-</main>
-
+{% block head %}
 <style>
-  .section-navbar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    padding: 1.5rem 2rem;
-    background-color: var(--museum-surface);
-    border-bottom: 1px solid var(--museum-border);
-    max-width: 100%;
-    overflow-x: auto;
-  }
-
-  .section-nav-link {
-    padding: 0.75rem 1.25rem;
-    border-radius: 0.375rem;
-    background-color: transparent;
-    color: var(--muted, #6b7280);
-    text-decoration: none;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-    border: 1px solid transparent;
-  }
-
-  .section-nav-link:hover {
-    background-color: var(--museum-bg);
-    color: var(--accent);
-  }
-
-  .section-nav-link.active {
-    background-color: var(--accent);
-    color: var(--primary);
-    font-weight: 600;
-  }
-
   .section-content {
     padding: 2rem;
     max-width: 900px;
@@ -273,9 +14,9 @@
     display: grid;
     gap: 1rem;
     padding: 1.5rem;
-    background-color: var(--museum-surface);
+    background-color: rgba(255, 255, 255, 0.02);
     border-radius: 0.5rem;
-    border: 1px solid var(--museum-border);
+    border: 1px solid #1e1e2e;
   }
 
   .stadium-info h3 {
@@ -294,7 +35,7 @@
     display: flex;
     gap: 1rem;
     padding: 1.5rem;
-    background-color: var(--museum-surface);
+    background-color: rgba(255, 255, 255, 0.02);
     border-radius: 0.5rem;
   }
 
@@ -302,7 +43,7 @@
     width: 100px;
     height: 100px;
     border-radius: 0.375rem;
-    border: 2px solid var(--museum-border);
+    border: 2px solid #1e1e2e;
     cursor: pointer;
     transition: transform 0.2s ease;
   }
@@ -315,11 +56,176 @@
     color: #d1d5db;
     line-height: 1.8;
     padding: 1.5rem;
-    background-color: var(--museum-surface);
+    background-color: rgba(255, 255, 255, 0.02);
     border-radius: 0.5rem;
     border-left: 4px solid var(--accent);
   }
 </style>
+{% endblock %}
 
-</body>
-</html>
+{% block body %}
+<main class="club-page" style="--primary: {{ team.primary_color }}; --secondary: {{ team.secondary_color }}; --accent: {{ team.accent_color }};">
+  <div class="club-topbar">
+    <a href="{{ url_for('club_page', slug=team.slug) }}" class="club-backlink">
+      ← Volver a {{ team.name }}
+    </a>
+  </div>
+
+  <div class="club-page-container">
+
+    {% include "components/club-nav.html" %}
+
+    <section class="club-hero">
+      <div class="club-hero__panel">
+        <div class="club-hero__identity">
+          {% if team.shield_path %}
+          <div class="club-hero__shield">
+            <img src="{{ url_for('static', path=team.shield_path) }}" alt="Escudo de {{ team.name }}" />
+          </div>
+          {% else %}
+          <div class="club-hero__shield club-hero__shield--fallback" style="background: {{ team.primary_color }}; color: {{ team.secondary_color }};">
+            {{ team.name[:3] | upper }}
+          </div>
+          {% endif %}
+          <div class="club-hero__text">
+            <p class="club-kicker">{{ title }}</p>
+            <h1>{{ team.name }}</h1>
+            <p class="club-subtitle">{{ team.city }} · Fundación {{ team.founded_year }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-content">
+      {% if section == "history" %}
+        <article class="history-panel">
+          <div class="panel__header"><span>Historia</span><span class="panel__tag">Trayectoria</span></div>
+          <p class="history-text">{{ team.name }} fue fundado en {{ team.founded_year }} y es uno de los clubes más emblemáticos del fútbol argentino.</p>
+        </article>
+
+      {% elif section == "rivals" %}
+        <article class="history-panel">
+          <div class="panel__header"><span>Rivales</span><span class="panel__tag">Clásicos</span></div>
+          {% if team.rivalries %}
+            <ul class="history-list">
+              {% for rivalry in team.rivalries %}
+                <li>
+                  <strong>{{ rivalry.rival_team.name }}</strong>
+                  <span>{{ rivalry.wins }} G · {{ rivalry.draws }} E · {{ rivalry.losses }} P</span>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-museum-muted">Sin datos de rivalidades cargados.</p>
+          {% endif %}
+        </article>
+
+      {% elif section == "stadium" %}
+        <article class="history-panel">
+          <div class="panel__header"><span>Estadio</span><span class="panel__tag">Casa</span></div>
+          {% if team.stadium %}
+            <div class="stadium-info">
+              <h3>{{ team.stadium.name }}</h3>
+              <p><strong>Capacidad:</strong> {{ team.stadium.capacity or "No registrada" }}</p>
+              <p><strong>Ubicación:</strong> {{ team.stadium.location or team.city }}</p>
+              <p><strong>Inauguración:</strong> {{ team.stadium.inaugurated_year or "No registrada" }}</p>
+            </div>
+          {% else %}
+            <p class="text-museum-muted">Sin estadio registrado.</p>
+          {% endif %}
+        </article>
+
+      {% elif section == "trophies" %}
+        <article class="history-panel">
+          <div class="panel__header"><span>Títulos</span><span class="panel__tag">Palmarés</span></div>
+          {% if team.trophies %}
+            <ul class="history-list">
+              {% for trophy in team.trophies | sort(attribute="year", reverse=True) %}
+                <li>
+                  <strong>{{ trophy.name }}</strong>
+                  <span>{{ trophy.year }} · {{ trophy.competition }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-museum-muted">Sin títulos cargados.</p>
+          {% endif %}
+        </article>
+
+      {% elif section == "international" %}
+        <article class="history-panel">
+          <div class="panel__header"><span>Títulos Internacionales</span><span class="panel__tag">Copas</span></div>
+          {% set international_trophies = team.trophies | selectattr("trophy_type.value", "equalto", "copa_internacional") | list %}
+          {% if international_trophies %}
+            <ul class="history-list">
+              {% for trophy in international_trophies | sort(attribute="year", reverse=True) %}
+                <li>
+                  <strong>{{ trophy.name }}</strong>
+                  <span>{{ trophy.year }} · {{ trophy.competition }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-museum-muted">Sin títulos internacionales registrados.</p>
+          {% endif %}
+        </article>
+
+      {% elif section == "kits" %}
+        <article class="history-panel">
+          <div class="panel__header"><span>Camisetas</span><span class="panel__tag">Colores</span></div>
+          <div class="color-palette">
+            <div class="color-swatch" style="background-color: {{ team.primary_color }};" title="Primario"></div>
+            <div class="color-swatch" style="background-color: {{ team.secondary_color }};" title="Secundario"></div>
+            <div class="color-swatch" style="background-color: {{ team.accent_color }};" title="Acento"></div>
+          </div>
+          {% if team.kits %}
+            <ul class="history-list" style="margin-top: 1.5rem;">
+              {% for kit in team.kits %}
+                <li>
+                  <strong>{{ kit.season }}</strong>
+                  <span>{{ kit.brand or '' }} {{ kit.sponsor or '' }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </article>
+
+      {% elif section == "squad" %}
+        <article class="history-panel">
+          <div class="panel__header"><span>Plantel</span><span class="panel__tag">Jugadores</span></div>
+          {% if team.players %}
+            <ul class="history-list">
+              {% for player in team.players %}
+                <li>
+                  <strong>{{ player.name }}</strong>
+                  <span>{{ player.position or player.position_group.value }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-museum-muted">Sin plantel cargado.</p>
+          {% endif %}
+        </article>
+
+      {% elif section == "idols" %}
+        <article class="history-panel">
+          <div class="panel__header"><span>Ídolos</span><span class="panel__tag">Leyendas</span></div>
+          {% if team.idols %}
+            <ul class="history-list">
+              {% for idol in team.idols %}
+                <li>
+                  <strong>{{ idol.name }}</strong>
+                  <span>{{ idol.period_label }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-museum-muted">Sin ídolos cargados.</p>
+          {% endif %}
+        </article>
+      {% endif %}
+    </section>
+
+  </div>
+</main>
+{% endblock %}

@@ -1,0 +1,17 @@
+{# Nav horizontal centrado, reutilizado en el dashboard y en cada sección de detalle #}
+{% set nav_items = [
+  ('club_page', 'dashboard', '🏠', 'Resumen'),
+  ('club_history', 'history', '📖', 'Historia'),
+  ('club_rivals', 'rivals', '⚔️', 'Rivales'),
+  ('club_stadium', 'stadium', '🏟️', 'Estadio'),
+  ('club_trophies', 'trophies', '🏆', 'Títulos'),
+  ('club_international', 'international', '🌎', 'Internacional'),
+  ('club_kits', 'kits', '👕', 'Camisetas'),
+  ('club_squad', 'squad', '⚽', 'Plantel'),
+  ('club_idols', 'idols', '⭐', 'Ídolos'),
+] %}
+<nav class="club-nav">
+  {% for route_name, key, icon, label in nav_items %}
+  <a href="{{ url_for(route_name, slug=team.slug) }}" class="club-nav__link{% if active_section == key %} is-active{% endif %}"><span class="icon">{{ icon }}</span><span>{{ label }}</span></a>
+  {% endfor %}
+</nav>

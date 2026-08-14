@@ -9,7 +9,6 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app.config import APP_NAME, DEBUG, STATIC_DIR
-from app.routes.htmx import router as htmx_router
 from app.routes.pages import router as pages_router
 
 app = FastAPI(
@@ -22,7 +21,6 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 # Routers
 app.include_router(pages_router)
-app.include_router(htmx_router)
 
 
 @app.get("/health")

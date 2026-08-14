@@ -7,17 +7,18 @@
   class="club-page-layout"
   style="--primary: {{ team.primary_color }}; --secondary: {{ team.secondary_color }}; --accent: {{ team.accent_color }};"
 >
-  {# Header fijo con backlink #}
   <header class="club-topbar">
     <a href="{{ url_for('home') }}" class="club-backlink">
       ← Volver al museo
     </a>
   </header>
 
-  {# Contenedor 2-col: main + sidebar #}
-  <div class="club-container">
-    {# MAIN CONTENT COLUMN #}
+  <div class="club-page-container">
+
+    {% include "components/club-nav.html" %}
+
     <article class="club-main">
+
       {# Hero Section #}
       <section class="club-hero">
         <div class="club-hero__panel">
@@ -53,280 +54,209 @@
             </div>
             <div class="club-meta__item">
               <span class="label">Temporada</span>
-              <strong>2025</strong>
+              <strong>{{ season }}</strong>
             </div>
           </div>
         </div>
       </section>
 
-      {# Dashboard Stats #}
-      <section class="club-dashboard">
-        <div class="club-dashboard__grid">
-          <article class="stat-card stat-card--gold">
-            <span class="stat-card__label">Títulos</span>
-            <strong>{{ trophies_count }}</strong>
-            <small>Historias ganadas</small>
-          </article>
-
-          <article class="stat-card">
-            <span class="stat-card__label">Jugadores</span>
-            <strong>{{ players_count }}</strong>
-            <small>Fichas del plantel</small>
-          </article>
-
-          <article class="stat-card">
-            <span class="stat-card__label">Ídolos</span>
-            <strong>{{ idols_count }}</strong>
-            <small>Figuras históricas</small>
-          </article>
-
-          <article class="stat-card">
-            <span class="stat-card__label">Rivales</span>
-            <strong>3</strong>
-            <small>Clásicos y duelos</small>
-          </article>
-        </div>
-
-        <div class="club-panels">
-          <article class="panel panel--wide">
-            <div class="panel__header">
-              <span>Resumen</span>
-              <span class="panel__tag">Ficha</span>
-            </div>
-            <p>
-              El club forma parte del archivo vivo del fútbol argentino. Esta vista será el punto de partida para la historia, el estadio, los títulos y el repertorio visual del equipo.
-            </p>
-          </article>
-
-          <article class="panel">
-            <div class="panel__header">
-              <span>Perfil</span>
-              <span class="panel__tag">Club</span>
-            </div>
-            <ul class="key-list">
-              <li><span>Fundación</span><strong>{{ team.founded_year }}</strong></li>
-              <li><span>Ciudad</span><strong>{{ team.city }}</strong></li>
-              <li><span>Estadio</span><strong>{{ stadium_name }}</strong></li>
-            </ul>
-          </article>
-        </div>
-      </section>
-
-      {# Standings - 2 ZONAS #}
-      {% if standings %}
-      <section class="standings-block">
-        <div class="standings-header">
-          <div>
-            <p class="club-kicker">Actualidad</p>
-            <h2>{{ competition }}</h2>
+      {# Próximo partido + temporizador #}
+      {% if next_match %}
+      {% set opponent = next_match.away_team if next_match.home_team_id == team.id else next_match.home_team %}
+      {% set is_home = next_match.home_team_id == team.id %}
+      <section class="next-match-block">
+        <div class="next-match-card">
+          <div class="next-match-card__meta">
+            <span class="club-kicker">Próximo partido</span>
+            <span>{{ next_match.competition }}{% if next_match.round_label %} · {{ next_match.round_label }}{% endif %}</span>
           </div>
-          <span class="standings-season">{{ season }}</span>
-        </div>
 
-        <!-- ZONA A -->
-        <div class="zone-container">
-          <h3 class="zone-title">Zona A</h3>
-          <div class="standings-table-wrap">
-            <table class="standings-table">
-              <thead>
-                <tr>
-                  <th class="pos-col">#</th>
-                  <th class="team-col">Equipo</th>
-                  <th>PJ</th>
-                  <th>G</th>
-                  <th>E</th>
-                  <th>P</th>
-                  <th>GF</th>
-                  <th>GC</th>
-                  <th>DG</th>
-                  <th>PTS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% set zona_a = standings | selectattr("zone", "equalto", "A") | list %}
-                {% for row in zona_a | sort(attribute="position") %}
-                <tr class="{% if row.team_id == team.id %}is-current-team{% endif %}">
-                  <td class="pos-cell">{{ row.position }}</td>
-                  <td class="team-cell">
-                    <div class="team-cell__inner">
-                      {% if row.team and row.team.shield_path %}
-                      <img src="{{ url_for('static', path=row.team.shield_path) }}" alt="Escudo de {{ row.team.name }}" />
-                      {% endif %}
-                      <span>{{ row.team.name if row.team else 'Club' }}</span>
-                    </div>
-                  </td>
-                  <td>{{ row.played }}</td>
-                  <td>{{ row.won }}</td>
-                  <td>{{ row.drawn }}</td>
-                  <td>{{ row.lost }}</td>
-                  <td>{{ row.goals_for }}</td>
-                  <td>{{ row.goals_against }}</td>
-                  <td>{{ row.goal_difference }}</td>
-                  <td class="pts-cell"><strong>{{ row.points }}</strong></td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+          <div class="next-match-card__teams">
+            <div class="next-match-card__team">
+              {% if team.shield_path %}
+              <img src="{{ url_for('static', path=team.shield_path) }}" alt="Escudo de {{ team.name }}" />
+              {% endif %}
+              <span>{{ team.name }}</span>
+            </div>
+            <span class="next-match-card__versus">vs</span>
+            <div class="next-match-card__team">
+              {% if opponent and opponent.shield_path %}
+              <img src="{{ url_for('static', path=opponent.shield_path) }}" alt="Escudo de {{ opponent.name }}" />
+              {% endif %}
+              <span>{{ opponent.name if opponent else 'Rival' }}</span>
+            </div>
           </div>
-        </div>
 
-        <!-- ZONA B -->
-        <div class="zone-container">
-          <h3 class="zone-title">Zona B</h3>
-          <div class="standings-table-wrap">
-            <table class="standings-table">
-              <thead>
-                <tr>
-                  <th class="pos-col">#</th>
-                  <th class="team-col">Equipo</th>
-                  <th>PJ</th>
-                  <th>G</th>
-                  <th>E</th>
-                  <th>P</th>
-                  <th>GF</th>
-                  <th>GC</th>
-                  <th>DG</th>
-                  <th>PTS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% set zona_b = standings | selectattr("zone", "equalto", "B") | list %}
-                {% for row in zona_b | sort(attribute="position") %}
-                <tr class="{% if row.team_id == team.id %}is-current-team{% endif %}">
-                  <td class="pos-cell">{{ row.position }}</td>
-                  <td class="team-cell">
-                    <div class="team-cell__inner">
-                      {% if row.team and row.team.shield_path %}
-                      <img src="{{ url_for('static', path=row.team.shield_path) }}" alt="Escudo de {{ row.team.name }}" />
-                      {% endif %}
-                      <span>{{ row.team.name if row.team else 'Club' }}</span>
-                    </div>
-                  </td>
-                  <td>{{ row.played }}</td>
-                  <td>{{ row.won }}</td>
-                  <td>{{ row.drawn }}</td>
-                  <td>{{ row.lost }}</td>
-                  <td>{{ row.goals_for }}</td>
-                  <td>{{ row.goals_against }}</td>
-                  <td>{{ row.goal_difference }}</td>
-                  <td class="pts-cell"><strong>{{ row.points }}</strong></td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+          <div class="next-match-card__info">
+            <span>{{ next_match.scheduled_at.strftime('%d %b %Y · %H:%M') }} hs</span>
+            <span>{{ 'Local' if is_home else 'Visitante' }}</span>
+            <span>{{ next_match.venue or stadium_name }}</span>
+          </div>
+
+          <div class="next-match-timer" data-match-datetime="{{ next_match.scheduled_at.isoformat() }}">
+            <div class="timer-unit"><strong id="timer-days">--</strong><span>días</span></div>
+            <div class="timer-unit"><strong id="timer-hours">--</strong><span>hs</span></div>
+            <div class="timer-unit"><strong id="timer-minutes">--</strong><span>min</span></div>
+            <div class="timer-unit"><strong id="timer-seconds">--</strong><span>seg</span></div>
           </div>
         </div>
       </section>
       {% endif %}
 
-      {# Fixtures / Calendar #}
-      {% if upcoming_matches %}
-      <section class="fixtures-block">
-        <div class="fixtures-header">
+      {# Dashboard Stats — teasers, cada uno linkea a su página detallada #}
+      <section class="club-dashboard">
+        <div class="club-dashboard__grid">
+          <a href="{{ url_for('club_trophies', slug=team.slug) }}" class="stat-card stat-card--gold stat-card--link">
+            <span class="stat-card__label">Títulos</span>
+            <strong>{{ trophies_count }}</strong>
+            <small>Ver palmarés completo →</small>
+          </a>
+
+          <a href="{{ url_for('club_squad', slug=team.slug) }}" class="stat-card stat-card--link">
+            <span class="stat-card__label">Jugadores</span>
+            <strong>{{ players_count }}</strong>
+            <small>Ver plantel completo →</small>
+          </a>
+
+          <a href="{{ url_for('club_idols', slug=team.slug) }}" class="stat-card stat-card--link">
+            <span class="stat-card__label">Ídolos</span>
+            <strong>{{ idols_count }}</strong>
+            <small>Ver galería de ídolos →</small>
+          </a>
+
+          <a href="{{ url_for('club_rivals', slug=team.slug) }}" class="stat-card stat-card--link">
+            <span class="stat-card__label">Rivales</span>
+            <strong>{{ team.rivalries | length }}</strong>
+            <small>Ver historial completo →</small>
+          </a>
+        </div>
+      </section>
+
+      {# Tabla de posiciones — SOLO la zona del equipo #}
+      {% if zone_standings %}
+      <section class="standings-block">
+        <div class="standings-header">
           <div>
-            <p class="club-kicker">Próximo partido</p>
-            <h2>Calendario</h2>
+            <p class="club-kicker">Actualidad</p>
+            <h2>{{ competition }} · Zona {{ zone_standings[0].zone }}</h2>
           </div>
-          <span class="fixtures-pill">{{ upcoming_matches | length }} encuentros</span>
+          <span class="standings-season">{{ season }}</span>
         </div>
 
-        <div class="fixtures-grid">
+        <div class="standings-table-wrap">
+          <table class="standings-table">
+            <thead>
+              <tr>
+                <th class="pos-col">#</th>
+                <th class="team-col">Equipo</th>
+                <th>PJ</th>
+                <th>G</th>
+                <th>E</th>
+                <th>P</th>
+                <th>GF</th>
+                <th>GC</th>
+                <th>DG</th>
+                <th>PTS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in zone_standings %}
+              <tr class="{% if row.team_id == team.id %}is-current-team{% endif %}">
+                <td class="pos-cell">{{ row.position }}</td>
+                <td class="team-cell">
+                  <div class="team-cell__inner">
+                    {% if row.team and row.team.shield_path %}
+                    <img src="{{ url_for('static', path=row.team.shield_path) }}" alt="Escudo de {{ row.team.name }}" />
+                    {% endif %}
+                    <span>{{ row.team.name if row.team else 'Club' }}</span>
+                  </div>
+                </td>
+                <td>{{ row.played }}</td>
+                <td>{{ row.won }}</td>
+                <td>{{ row.drawn }}</td>
+                <td>{{ row.lost }}</td>
+                <td>{{ row.goals_for }}</td>
+                <td>{{ row.goals_against }}</td>
+                <td>{{ row.goal_difference }}</td>
+                <td class="pts-cell"><strong>{{ row.points }}</strong></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+      {% endif %}
+
+      {# Próximos 5 rivales — lista compacta #}
+      {% if upcoming_matches %}
+      <section class="rivals-upcoming-block">
+        <div class="fixtures-header">
+          <div>
+            <p class="club-kicker">Calendario</p>
+            <h2>Próximos rivales</h2>
+          </div>
+          <span class="fixtures-pill">{{ upcoming_matches | length }} partidos</span>
+        </div>
+
+        <ul class="rivals-upcoming-list">
           {% for match in upcoming_matches %}
             {% set opponent = match.away_team if match.home_team_id == team.id else match.home_team %}
             {% set is_home = match.home_team_id == team.id %}
-            <article class="fixture-card">
-              <div class="fixture-card__meta">
-                <span>{{ match.competition }}</span>
-                <span>{{ match.round_label or 'Fecha' }}</span>
+            <li class="rivals-upcoming-item">
+              {% if opponent and opponent.shield_path %}
+              <img src="{{ url_for('static', path=opponent.shield_path) }}" alt="Escudo de {{ opponent.name }}" />
+              {% endif %}
+              <div class="rivals-upcoming-item__info">
+                <strong>{{ opponent.name if opponent else 'Rival' }}</strong>
+                <span>{{ match.scheduled_at.strftime('%d %b') }} · {{ 'Local' if is_home else 'Visitante' }}</span>
               </div>
-
-              <div class="fixture-card__teams">
-                <div class="fixture-card__team fixture-card__team--current">
-                  {% if team.shield_path %}
-                  <img src="{{ url_for('static', path=team.shield_path) }}" alt="Escudo de {{ team.name }}" />
-                  {% endif %}
-                  <span>{{ team.name }}</span>
-                </div>
-
-                <span class="fixture-card__versus">vs</span>
-
-                <div class="fixture-card__team">
-                  {% if opponent and opponent.shield_path %}
-                  <img src="{{ url_for('static', path=opponent.shield_path) }}" alt="Escudo de {{ opponent.name }}" />
-                  {% endif %}
-                  <span>{{ opponent.name if opponent else 'Rival' }}</span>
-                </div>
-              </div>
-
-              <div class="fixture-card__info">
-                <span>{{ match.scheduled_at.strftime('%d %b %Y') }}</span>
-                <span>{{ match.scheduled_at.strftime('%H:%M') }} hs</span>
-                <span>{{ 'Local' if is_home else 'Visitante' }}</span>
-              </div>
-
-              <div class="fixture-card__location">
-                <span>{{ match.venue or stadium_name }}</span>
-              </div>
-            </article>
+              <span class="rivals-upcoming-item__round">{{ match.round_label or '' }}</span>
+            </li>
           {% endfor %}
-      {# History Panel - Removed, now separate pages #}
+        </ul>
+      </section>
+      {% endif %}
+
     </article>
-
-    {# SIDEBAR NAVIGATION #}
-    <aside class="club-sidebar">
-      <nav class="club-sidebar__nav">
-        <p class="club-sidebar__title">Historia & Datos</p>
-        
-        <a href="/club/{{ team.slug }}/history" class="club-sidebar__link">
-          <span class="icon">📖</span>
-          <span>Historia</span>
-        </a>
-
-        <a href="/club/{{ team.slug }}/rivals" class="club-sidebar__link">
-          <span class="icon">⚔️</span>
-          <span>Rivales</span>
-        </a>
-
-        <a href="/club/{{ team.slug }}/stadium" class="club-sidebar__link">
-          <span class="icon">🏟️</span>
-          <span>Estadio</span>
-        </a>
-
-        <a href="/club/{{ team.slug }}/trophies" class="club-sidebar__link">
-          <span class="icon">🏆</span>
-          <span>Títulos</span>
-        </a>
-
-        <a href="/club/{{ team.slug }}/international" class="club-sidebar__link">
-          <span class="icon">🌎</span>
-          <span>Internacional</span>
-        </a>
-
-        <a href="/club/{{ team.slug }}/kits" class="club-sidebar__link">
-          <span class="icon">👕</span>
-          <span>Camisetas</span>
-        </a>
-
-        <a href="/club/{{ team.slug }}/squad" class="club-sidebar__link">
-          <span class="icon">⚽</span>
-          <span>Plantel</span>
-        </a>
-
-        <a href="/club/{{ team.slug }}/idols" class="club-sidebar__link">
-          <span class="icon">⭐</span>
-          <span>Ídolos</span>
-        </a>
-      </nav>
-    </aside>
   </div>
 </main>
 
 <script>
-{# Ya no necesitamos HTMX, las secciones son páginas completas #}
-console.log('Club page loaded with sidebar navigation');
+  (function () {
+    const timerEl = document.querySelector('.next-match-timer');
+    if (!timerEl) return;
+
+    const target = new Date(timerEl.dataset.matchDatetime).getTime();
+    const daysEl = document.getElementById('timer-days');
+    const hoursEl = document.getElementById('timer-hours');
+    const minutesEl = document.getElementById('timer-minutes');
+    const secondsEl = document.getElementById('timer-seconds');
+
+    function pad(n) {
+      return String(n).padStart(2, '0');
+    }
+
+    function tick() {
+      const diff = target - Date.now();
+      if (diff <= 0) {
+        daysEl.textContent = '00';
+        hoursEl.textContent = '00';
+        minutesEl.textContent = '00';
+        secondsEl.textContent = '00';
+        return;
       }
-    });
-  }
-});
+      const days = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      const minutes = Math.floor((diff % 3600000) / 60000);
+      const seconds = Math.floor((diff % 60000) / 1000);
+      daysEl.textContent = pad(days);
+      hoursEl.textContent = pad(hours);
+      minutesEl.textContent = pad(minutes);
+      secondsEl.textContent = pad(seconds);
+    }
+
+    tick();
+    setInterval(tick, 1000);
+  })();
 </script>
 {% endblock %}

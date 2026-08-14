@@ -1,5 +1,5 @@
 """
-Rutas que devuelven páginas HTML completas (no partials HTMX).
+Rutas que devuelven páginas HTML completas.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -47,7 +47,7 @@ async def club_page(
     slug: str,
     db: Session = Depends(get_db),
 ) -> HTMLResponse:
-    """Página de un club (placeholder hasta Paso 5)."""
+    """Dashboard del club: info de temporada actual, no historial detallado."""
     team = team_service.get_team_by_slug(db, slug)
     if team is None:
         raise HTTPException(status_code=404, detail="Club no encontrado")
@@ -56,11 +56,13 @@ async def club_page(
     trophies_count = len(team.trophies)
     players_count = len(team.players)
     idols_count = len(team.idols)
+
     season = "2025"
     competition = "Liga Profesional"
-    standings = team_service.get_standings_by_competition(db, season, competition)
-    current_row = team_service.get_team_standing_row(db, team.id, season, competition)
-    upcoming_matches = team_service.get_upcoming_matches_for_team(db, team.id, limit=3)
+
+    zone_standings = team_service.get_zone_standings_for_team(db, team.id, season, competition)
+    next_match = team_service.get_next_match_for_team(db, team.id)
+    upcoming_matches = team_service.get_upcoming_matches_for_team(db, team.id, limit=5)
 
     return templates.TemplateResponse(
         request=request,
@@ -72,117 +74,93 @@ async def club_page(
             "trophies_count": trophies_count,
             "players_count": players_count,
             "idols_count": idols_count,
-            "standings": standings,
-            "current_row": current_row,
+            "zone_standings": zone_standings,
+            "next_match": next_match,
             "upcoming_matches": upcoming_matches,
             "season": season,
             "competition": competition,
+            "active_section": "dashboard",
         },
     )
 
 
-# === RUTAS DE SECCIONES DEL CLUB ===
+# === RUTAS DE SECCIONES DEL CLUB (páginas dedicadas, sin dashboard) ===
+
+
+def _section_response(request: Request, team, section: str) -> HTMLResponse:
+    """Helper interno: arma la respuesta de una sección de detalle."""
+    return templates.TemplateResponse(
+        request=request,
+        name="pages/club-section.html",
+        context={
+            "app_name": APP_NAME,
+            "team": team,
+            "section": section,
+            "active_section": section,
+            "title": SECTION_TITLES[section],
+        },
+    )
 
 
 @router.get("/club/{slug}/history", response_class=HTMLResponse, name="club_history")
 async def club_history(request: Request, slug: str, db: Session = Depends(get_db)) -> HTMLResponse:
-    """Historia del club."""
     team = team_service.get_team_by_slug(db, slug)
     if team is None:
         raise HTTPException(status_code=404, detail="Club no encontrado")
-    return templates.TemplateResponse(
-        request=request,
-        name="pages/club-section.html",
-        context={"team": team, "section": "history", "title": SECTION_TITLES["history"]},
-    )
+    return _section_response(request, team, "history")
 
 
 @router.get("/club/{slug}/rivals", response_class=HTMLResponse, name="club_rivals")
 async def club_rivals(request: Request, slug: str, db: Session = Depends(get_db)) -> HTMLResponse:
-    """Rivales del club."""
     team = team_service.get_team_by_slug(db, slug)
     if team is None:
         raise HTTPException(status_code=404, detail="Club no encontrado")
-    return templates.TemplateResponse(
-        request=request,
-        name="pages/club-section.html",
-        context={"team": team, "section": "rivals", "title": SECTION_TITLES["rivals"]},
-    )
+    return _section_response(request, team, "rivals")
 
 
 @router.get("/club/{slug}/stadium", response_class=HTMLResponse, name="club_stadium")
 async def club_stadium(request: Request, slug: str, db: Session = Depends(get_db)) -> HTMLResponse:
-    """Estadio del club."""
     team = team_service.get_team_by_slug(db, slug)
     if team is None:
         raise HTTPException(status_code=404, detail="Club no encontrado")
-    return templates.TemplateResponse(
-        request=request,
-        name="pages/club-section.html",
-        context={"team": team, "section": "stadium", "title": SECTION_TITLES["stadium"]},
-    )
+    return _section_response(request, team, "stadium")
 
 
 @router.get("/club/{slug}/trophies", response_class=HTMLResponse, name="club_trophies")
 async def club_trophies(request: Request, slug: str, db: Session = Depends(get_db)) -> HTMLResponse:
-    """Títulos del club."""
     team = team_service.get_team_by_slug(db, slug)
     if team is None:
         raise HTTPException(status_code=404, detail="Club no encontrado")
-    return templates.TemplateResponse(
-        request=request,
-        name="pages/club-section.html",
-        context={"team": team, "section": "trophies", "title": SECTION_TITLES["trophies"]},
-    )
+    return _section_response(request, team, "trophies")
 
 
 @router.get("/club/{slug}/international", response_class=HTMLResponse, name="club_international")
 async def club_international(request: Request, slug: str, db: Session = Depends(get_db)) -> HTMLResponse:
-    """Títulos internacionales del club."""
     team = team_service.get_team_by_slug(db, slug)
     if team is None:
         raise HTTPException(status_code=404, detail="Club no encontrado")
-    return templates.TemplateResponse(
-        request=request,
-        name="pages/club-section.html",
-        context={"team": team, "section": "international", "title": SECTION_TITLES["international"]},
-    )
+    return _section_response(request, team, "international")
 
 
 @router.get("/club/{slug}/kits", response_class=HTMLResponse, name="club_kits")
 async def club_kits(request: Request, slug: str, db: Session = Depends(get_db)) -> HTMLResponse:
-    """Camisetas del club."""
     team = team_service.get_team_by_slug(db, slug)
     if team is None:
         raise HTTPException(status_code=404, detail="Club no encontrado")
-    return templates.TemplateResponse(
-        request=request,
-        name="pages/club-section.html",
-        context={"team": team, "section": "kits", "title": SECTION_TITLES["kits"]},
-    )
+    return _section_response(request, team, "kits")
 
 
 @router.get("/club/{slug}/squad", response_class=HTMLResponse, name="club_squad")
 async def club_squad(request: Request, slug: str, db: Session = Depends(get_db)) -> HTMLResponse:
-    """Plantel del club."""
     team = team_service.get_team_by_slug(db, slug)
     if team is None:
         raise HTTPException(status_code=404, detail="Club no encontrado")
-    return templates.TemplateResponse(
-        request=request,
-        name="pages/club-section.html",
-        context={"team": team, "section": "squad", "title": SECTION_TITLES["squad"]},
-    )
+    return _section_response(request, team, "squad")
 
 
 @router.get("/club/{slug}/idols", response_class=HTMLResponse, name="club_idols")
 async def club_idols(request: Request, slug: str, db: Session = Depends(get_db)) -> HTMLResponse:
-    """Ídolos del club."""
     team = team_service.get_team_by_slug(db, slug)
     if team is None:
         raise HTTPException(status_code=404, detail="Club no encontrado")
-    return templates.TemplateResponse(
-        request=request,
-        name="pages/club-section.html",
-        context={"team": team, "section": "idols", "title": SECTION_TITLES["idols"]},
-    )
+    return _section_response(request, team, "idols")
