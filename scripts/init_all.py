@@ -49,6 +49,7 @@ def main() -> int:
         "seed_idols.py",
         "seed_rivalries.py",
         "seed_players.py",
+        "seed_kits.py",
         "scrapers.py",
     ]
 

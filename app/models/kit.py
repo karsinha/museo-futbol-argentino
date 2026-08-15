@@ -27,6 +27,7 @@ class Kit(Base):
 
     decade: Mapped[str] = mapped_column(String(10), index=True)
     season: Mapped[str] = mapped_column(String(20))
+    kit_type: Mapped[str] = mapped_column(String(30), default="Local")  
     brand: Mapped[str | None] = mapped_column(String(60), nullable=True)
     sponsor: Mapped[str | None] = mapped_column(String(80), nullable=True)
     competition_highlight: Mapped[str | None] = mapped_column(String(120), nullable=True)

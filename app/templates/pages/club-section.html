@@ -6,7 +6,7 @@
 <style>
   .section-content {
     padding: 2rem;
-    max-width: 900px;
+    max-width: 1200px;
     margin: 0 auto;
   }
 
@@ -105,16 +105,74 @@
 
       {% elif section == "rivals" %}
         <article class="history-panel">
-          <div class="panel__header"><span>Rivales</span><span class="panel__tag">Clásicos</span></div>
+          <div class="panel__header"><span>Rivales</span><span class="panel__tag">Historial</span></div>
+
           {% if team.rivalries %}
-            <ul class="history-list">
-              {% for rivalry in team.rivalries %}
-                <li>
-                  <strong>{{ rivalry.rival_team.name }}</strong>
-                  <span>{{ rivalry.wins }} G · {{ rivalry.draws }} E · {{ rivalry.losses }} P</span>
-                </li>
+            {% set sorted_rivalries = team.rivalries | sort(attribute="is_primary_classic", reverse=True) %}
+            <div class="rivals-grid">
+              {% for rivalry in sorted_rivalries %}
+                {% set total = rivalry.wins + rivalry.draws + rivalry.losses %}
+                {% set has_goals = rivalry.goals_for > 0 or rivalry.goals_against > 0 %}
+                <div class="rival-card {% if loop.index > 12 %}is-extra is-hidden{% endif %}">
+                  {% if rivalry.is_primary_classic %}
+                    <span class="rival-card__badge">Clásico</span>
+                  {% endif %}
+
+                  <div class="rival-card__header">
+                    <div class="rival-card__shield">
+                      {% if rivalry.rival_team.shield_path %}
+                        <img src="{{ url_for('static', path=rivalry.rival_team.shield_path) }}" alt="Escudo de {{ rivalry.rival_team.name }}" />
+                      {% else %}
+                        <span class="rival-card__shield--fallback">{{ rivalry.rival_team.name[:3] | upper }}</span>
+                      {% endif %}
+                    </div>
+                    <div class="rival-card__name">
+                      <strong>{{ rivalry.rival_team.name }}</strong>
+                      <span>{{ total }} partidos</span>
+                    </div>
+                  </div>
+
+                  {% if total > 0 %}
+                    <div class="rival-card__bar">
+                      <span class="rival-card__bar-segment rival-card__bar-segment--win" style="width: {{ (rivalry.wins / total * 100) | round(1) }}%;"></span>
+                      <span class="rival-card__bar-segment rival-card__bar-segment--draw" style="width: {{ (rivalry.draws / total * 100) | round(1) }}%;"></span>
+                      <span class="rival-card__bar-segment rival-card__bar-segment--loss" style="width: {{ (rivalry.losses / total * 100) | round(1) }}%;"></span>
+                    </div>
+                  {% endif %}
+
+                  <div class="rival-card__stats">
+                    <div class="rival-stat rival-stat--win">
+                      <strong>{{ rivalry.wins }}</strong>
+                      <span>Ganados</span>
+                    </div>
+                    <div class="rival-stat rival-stat--draw">
+                      <strong>{{ rivalry.draws }}</strong>
+                      <span>Empatados</span>
+                    </div>
+                    <div class="rival-stat rival-stat--loss">
+                      <strong>{{ rivalry.losses }}</strong>
+                      <span>Perdidos</span>
+                    </div>
+                  </div>
+
+                  {% if has_goals %}
+                    <div class="rival-card__goals">
+                      <span>{{ rivalry.goals_for }} GF</span>
+                      <span>{{ rivalry.goals_against }} GC</span>
+                      <span class="{% if rivalry.goal_difference > 0 %}is-positive{% elif rivalry.goal_difference < 0 %}is-negative{% endif %}">
+                        {{ '+' if rivalry.goal_difference > 0 else '' }}{{ rivalry.goal_difference }} DG
+                      </span>
+                    </div>
+                  {% endif %}
+                </div>
               {% endfor %}
-            </ul>
+
+              {% if sorted_rivalries | length > 12 %}
+                <button type="button" class="rival-card rival-card--show-all" data-show-all>
+                  <span>Mostrar los {{ sorted_rivalries | length - 12 }} rivales restantes</span>
+                </button>
+              {% endif %}
+            </div>
           {% else %}
             <p class="text-museum-muted">Sin datos de rivalidades cargados.</p>
           {% endif %}
@@ -173,35 +231,111 @@
       {% elif section == "kits" %}
         <article class="history-panel">
           <div class="panel__header"><span>Camisetas</span><span class="panel__tag">Colores</span></div>
+
           <div class="color-palette">
             <div class="color-swatch" style="background-color: {{ team.primary_color }};" title="Primario"></div>
             <div class="color-swatch" style="background-color: {{ team.secondary_color }};" title="Secundario"></div>
             <div class="color-swatch" style="background-color: {{ team.accent_color }};" title="Acento"></div>
           </div>
+
           {% if team.kits %}
-            <ul class="history-list" style="margin-top: 1.5rem;">
-              {% for kit in team.kits %}
-                <li>
-                  <strong>{{ kit.season }}</strong>
-                  <span>{{ kit.brand or '' }} {{ kit.sponsor or '' }}</span>
-                </li>
+            {% set decades = team.kits | map(attribute="decade") | unique | list | sort(reverse=True) %}
+            {% set years = team.kits | map(attribute="season") | unique | list | sort(reverse=True) %}
+
+            <div class="section-tabs" data-kits-tabs>
+              <button type="button" class="section-tab is-active" data-filter="all">Todas</button>
+              {% for decade in decades %}
+                <button type="button" class="section-tab" data-filter="{{ decade }}">{{ decade }}</button>
               {% endfor %}
-            </ul>
+            </div>
+
+            {% for year in years %}
+              {% set year_kits = team.kits | selectattr("season", "equalto", year) | list %}
+              {% set year_decade = year_kits[0].decade %}
+              {% set brands = year_kits | map(attribute="brand") | select | unique | list %}
+              {% set highlights = year_kits | map(attribute="competition_highlight") | select | unique | list %}
+
+              <div class="kit-year-block" data-decade="{{ year_decade }}">
+                <div class="kit-year-block__header">
+                  <h3>{{ year }}</h3>
+                  <div class="kit-year-block__tags">
+                    {% for b in brands %}<span>{{ b }}</span>{% endfor %}
+                    {% for h in highlights %}<span>{{ h }}</span>{% endfor %}
+                  </div>
+                </div>
+
+                <div class="kits-grid">
+                  {% for kit in year_kits %}
+                    <div class="kit-card {% if loop.index > 4 %}is-extra is-hidden{% endif %}">
+                      <div class="kit-card__visual">
+                        {% if kit.image_path %}
+                          <img src="{{ url_for('static', path=kit.image_path) }}" alt="Camiseta {{ kit.season }} {{ kit.kit_type }}" />
+                        {% else %}
+                          <span class="kit-card__jersey-icon">
+                            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M20 6 L8 16 L14 24 L20 20 V56 H44 V20 L50 24 L56 16 L44 6 L38 10 H26 Z"
+                                    fill="{{ team.secondary_color }}" stroke="{{ team.accent_color }}" stroke-width="1.5"/>
+                            </svg>
+                          </span>
+                        {% endif %}
+                      </div>
+                      <div class="kit-card__body">
+                        <span class="kit-card__season">{{ team.name }}</span>
+                        <span class="kit-card__meta">{{ kit.season }} {{ kit.kit_type }}</span>
+                      </div>
+                    </div>
+                  {% endfor %}
+
+                  {% if year_kits | length > 4 %}
+                    <button type="button" class="kit-card kit-card--show-all" data-show-all>
+                      <span>Mostrar todo</span>
+                    </button>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p class="text-museum-muted">Sin camisetas cargadas.</p>
           {% endif %}
         </article>
 
       {% elif section == "squad" %}
         <article class="history-panel">
           <div class="panel__header"><span>Plantel</span><span class="panel__tag">Jugadores</span></div>
+
           {% if team.players %}
-            <ul class="history-list">
-              {% for player in team.players %}
-                <li>
-                  <strong>{{ player.name }}</strong>
-                  <span>{{ player.position or player.position_group.value }}</span>
-                </li>
+            {% set groups = [
+              ("arquero", "Arqueros"),
+              ("defensor", "Defensores"),
+              ("mediocampista", "Mediocampistas"),
+              ("delantero", "Delanteros"),
+            ] %}
+
+            <div class="section-tabs" data-squad-tabs>
+              <button type="button" class="section-tab is-active" data-filter="all">Todos</button>
+              {% for value, label in groups %}
+                <button type="button" class="section-tab" data-filter="{{ value }}">{{ label }}</button>
               {% endfor %}
-            </ul>
+            </div>
+
+            <div class="squad-grid" data-squad-grid>
+              {% for player in team.players | sort(attribute="shirt_number") %}
+                <div class="player-card" data-group="{{ player.position_group.value }}">
+                  <span class="player-card__number">{{ player.shirt_number or "-" }}</span>
+                  <div class="player-card__photo">
+                    {% if player.photo_path %}
+                      <img src="{{ url_for('static', path=player.photo_path) }}" alt="{{ player.name }}" />
+                    {% else %}
+                      <span class="player-card__photo--fallback">{{ player.name[:1] }}</span>
+                    {% endif %}
+                  </div>
+                  <div class="player-card__footer">
+                    <span class="player-card__name">{{ player.name }}</span>
+                    <span class="player-card__position">{{ player.position or player.position_group.value }}</span>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
           {% else %}
             <p class="text-museum-muted">Sin plantel cargado.</p>
           {% endif %}
@@ -210,15 +344,47 @@
       {% elif section == "idols" %}
         <article class="history-panel">
           <div class="panel__header"><span>Ídolos</span><span class="panel__tag">Leyendas</span></div>
+
           {% if team.idols %}
-            <ul class="history-list">
-              {% for idol in team.idols %}
-                <li>
-                  <strong>{{ idol.name }}</strong>
-                  <span>{{ idol.period_label }}</span>
-                </li>
+            <div class="idols-grid">
+              {% for idol in team.idols | sort(attribute="period_start", reverse=True) %}
+                <div class="idol-card">
+                  <div class="idol-card__photo">
+                    {% if idol.photo_path %}
+                      <img src="{{ url_for('static', path=idol.photo_path) }}" alt="{{ idol.name }}" />
+                    {% else %}
+                      <span class="idol-card__photo--fallback">{{ idol.name[:1] }}</span>
+                    {% endif %}
+                  </div>
+
+                  <div class="idol-card__body">
+                    <span class="idol-card__name">{{ idol.name }}</span>
+                    {% if idol.period_label %}
+                      <span class="idol-card__period">{{ idol.period_label }}</span>
+                    {% endif %}
+
+                    {% if idol.matches or idol.goals or idol.assists or idol.titles_count %}
+                      <div class="idol-card__stats">
+                        {% if idol.matches %}
+                          <div class="idol-stat"><strong>{{ idol.matches }}</strong><span>PJ</span></div>
+                        {% endif %}
+                        {% if idol.goals %}
+                          <div class="idol-stat"><strong>{{ idol.goals }}</strong><span>Goles</span></div>
+                        {% endif %}
+                        {% if idol.assists %}
+                          <div class="idol-stat"><strong>{{ idol.assists }}</strong><span>Asist.</span></div>
+                        {% endif %}
+                        {% if idol.titles_count %}
+                          <div class="idol-stat"><strong>{{ idol.titles_count }}</strong><span>Títulos</span></div>
+                        {% endif %}
+                      </div>
+                    {% endif %}
+
+                    
+                  </div>
+                </div>
               {% endfor %}
-            </ul>
+            </div>
           {% else %}
             <p class="text-museum-muted">Sin ídolos cargados.</p>
           {% endif %}
@@ -228,4 +394,58 @@
 
   </div>
 </main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function wireTabs(tabsSelector, gridSelector, cardSelector, dataAttr) {
+    const tabs = document.querySelector(tabsSelector);
+    const grid = document.querySelector(gridSelector);
+    if (!tabs || !grid) return;
+
+    tabs.addEventListener('click', function (e) {
+      const btn = e.target.closest('.section-tab');
+      if (!btn) return;
+      tabs.querySelectorAll('.section-tab').forEach((t) => t.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      const filter = btn.dataset.filter;
+      grid.querySelectorAll(cardSelector).forEach((card) => {
+        card.style.display = (filter === 'all' || card.dataset[dataAttr] === filter) ? '' : 'none';
+      });
+    });
+  }
+
+  function wireKitDecadeTabs() {
+    const tabs = document.querySelector('[data-kits-tabs]');
+    if (!tabs) return;
+    const blocks = document.querySelectorAll('.kit-year-block');
+
+    tabs.addEventListener('click', function (e) {
+      const btn = e.target.closest('.section-tab');
+      if (!btn) return;
+      tabs.querySelectorAll('.section-tab').forEach((t) => t.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      const filter = btn.dataset.filter;
+      blocks.forEach((block) => {
+        block.style.display = (filter === 'all' || block.dataset.decade === filter) ? '' : 'none';
+      });
+    });
+  }
+
+  function wireShowAll() {
+    document.querySelectorAll('[data-show-all]').forEach((btn) => {
+      btn.addEventListener('click', function () {
+        const grid = btn.closest('.kits-grid, .rivals-grid');
+        grid.querySelectorAll('.is-extra').forEach((c) => c.classList.remove('is-hidden'));
+        btn.remove();
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    wireTabs('[data-squad-tabs]', '[data-squad-grid]', '.player-card', 'group');
+    wireKitDecadeTabs();
+    wireShowAll();
+  });
+</script>
 {% endblock %}

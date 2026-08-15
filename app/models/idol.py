@@ -31,6 +31,7 @@ class Idol(Base):
     period_end: Mapped[int | None] = mapped_column(nullable=True)
     matches: Mapped[int | None] = mapped_column(nullable=True)
     goals: Mapped[int | None] = mapped_column(nullable=True)
+    assists: Mapped[int | None] = mapped_column(nullable=True)  
     titles_count: Mapped[int | None] = mapped_column(nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     photo_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
