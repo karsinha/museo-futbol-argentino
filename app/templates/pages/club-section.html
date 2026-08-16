@@ -8,6 +8,7 @@
     padding: 2rem;
     max-width: 1200px;
     margin: 0 auto;
+    width: 100%;
   }
 
   .stadium-info {
@@ -31,26 +32,7 @@
     line-height: 1.6;
   }
 
-  .color-palette {
-    display: flex;
-    gap: 1rem;
-    padding: 1.5rem;
-    background-color: rgba(255, 255, 255, 0.02);
-    border-radius: 0.5rem;
-  }
-
-  .color-swatch {
-    width: 100px;
-    height: 100px;
-    border-radius: 0.375rem;
-    border: 2px solid #1e1e2e;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-  }
-
-  .color-swatch:hover {
-    transform: scale(1.05);
-  }
+  
 
   .history-text {
     color: #d1d5db;
@@ -232,11 +214,7 @@
         <article class="history-panel">
           <div class="panel__header"><span>Camisetas</span><span class="panel__tag">Colores</span></div>
 
-          <div class="color-palette">
-            <div class="color-swatch" style="background-color: {{ team.primary_color }};" title="Primario"></div>
-            <div class="color-swatch" style="background-color: {{ team.secondary_color }};" title="Secundario"></div>
-            <div class="color-swatch" style="background-color: {{ team.accent_color }};" title="Acento"></div>
-          </div>
+          
 
           {% if team.kits %}
             {% set decades = team.kits | map(attribute="decade") | unique | list | sort(reverse=True) %}
@@ -324,10 +302,10 @@
                   <span class="player-card__number">{{ player.shirt_number or "-" }}</span>
                   <div class="player-card__photo">
                     {% if player.photo_path %}
-                      <img src="{{ url_for('static', path=player.photo_path) }}" alt="{{ player.name }}" />
-                    {% else %}
-                      <span class="player-card__photo--fallback">{{ player.name[:1] }}</span>
-                    {% endif %}
+  <img src="{{ player.photo_path | media_url }}" alt="{{ player.name }}" loading="lazy" />
+{% else %}
+  <span class="player-card__photo--fallback">{{ player.name[:1] }}</span>
+{% endif %}
                   </div>
                   <div class="player-card__footer">
                     <span class="player-card__name">{{ player.name }}</span>

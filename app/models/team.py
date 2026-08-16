@@ -48,6 +48,9 @@ class Team(Base):
 
     shield_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
+    external_api_id: Mapped[int | None] = mapped_column(nullable=True, index=True, unique=True)
+
+
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
     # --- Relaciones ---

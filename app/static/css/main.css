@@ -705,20 +705,6 @@ body {
   padding-bottom: 0;
 }
 
-.color-palette {
-  display: flex;
-  gap: 0.5rem;
-  margin: 0.4rem 0 1rem;
-}
-
-.color-palette span {
-  display: block;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-}
-
 @media (max-width: 820px) {
   .club-hero__panel,
   .club-panels,
@@ -987,9 +973,26 @@ body {
 /* === GRILLA DE JUGADORES === */
 .squad-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 200px));
-  justify-content: start;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 1rem;
+}
+
+@media (max-width: 1100px) {
+  .squad-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .squad-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .squad-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .player-card {
@@ -1069,87 +1072,19 @@ body {
   letter-spacing: 0.05em;
 }
 
-/* === GRILLA DE CAMISETAS === */
-.kits-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 1.1rem;
-  margin-top: 1.5rem;
-}
-
-.kit-card {
-  border-radius: 1rem;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.02);
-  transition: transform 0.2s ease, border-color 0.2s ease;
-}
-
-.kit-card:hover {
-  transform: translateY(-3px);
-  border-color: var(--accent);
-}
-
-.kit-card__visual {
+/* === PLANTEL: patrón chevron detrás de la foto === */
+.player-card__photo {
   position: relative;
-  aspect-ratio: 4 / 5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(150deg, var(--primary) 0%, var(--secondary) 130%);
+  background-image: repeating-linear-gradient(
+    -35deg,
+    rgba(255, 255, 255, 0.05) 0px,
+    rgba(255, 255, 255, 0.05) 2px,
+    transparent 2px,
+    transparent 14px
+  );
 }
 
-.kit-card__visual img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.kit-card__season-badge {
-  position: absolute;
-  top: 0.6rem;
-  left: 0.6rem;
-  background: rgba(0, 0, 0, 0.5);
-  color: #fff;
-  font-size: 0.66rem;
-  font-weight: 600;
-  padding: 0.2rem 0.6rem;
-  border-radius: 999px;
-  letter-spacing: 0.04em;
-}
-
-.kit-card__jersey-icon svg {
-  width: 46%;
-  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
-}
-
-.kit-card__body {
-  padding: 0.8rem 0.9rem;
-}
-
-.kit-card__season {
-  display: block;
-  font-weight: 700;
-  color: #fff;
-  font-size: 0.9rem;
-}
-
-.kit-card__meta {
-  display: block;
-  margin-top: 0.2rem;
-  font-size: 0.74rem;
-  color: #9ca3af;
-}
-
-.kit-card__highlight {
-  display: block;
-  margin-top: 0.4rem;
-  font-size: 0.7rem;
-  color: var(--accent);
-  letter-spacing: 0.02em;
-}
-
-/* === CAMISETAS AGRUPADAS POR AÑO === */
+/* === GRILLA DE CAMISETAS (agrupadas por año) === */
 .kit-year-block {
   margin-bottom: 2.5rem;
 }
@@ -1186,8 +1121,26 @@ body {
 
 .kits-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 1.5rem;
+}
+
+@media (max-width: 1100px) {
+  .kits-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .kits-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .kits-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .kit-card {
@@ -1260,24 +1213,11 @@ body {
   display: none;
 }
 
-/* === PLANTEL: patrón chevron detrás de la foto === */
-.player-card__photo {
-  position: relative;
-  background-image: repeating-linear-gradient(
-    -35deg,
-    rgba(255, 255, 255, 0.05) 0px,
-    rgba(255, 255, 255, 0.05) 2px,
-    transparent 2px,
-    transparent 14px
-  );
-}
-
 /* === GRILLA DE ÍDOLOS === */
 .idols-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 280px));
-  justify-content: start;
-  gap: 0.9rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
 }
 
 .idol-card {
@@ -1368,18 +1308,10 @@ body {
   letter-spacing: 0.04em;
 }
 
-
-@media (max-width: 480px) {
-  .idols-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 /* === GRILLA DE RIVALES === */
 .rivals-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 260px));
-  justify-content: start;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
 }
 
@@ -1561,10 +1493,24 @@ body {
   color: var(--accent);
 }
 
+/* === RESPONSIVE: rivales / ídolos, mismo breakpoint que camisetas === */
+@media (max-width: 1100px) {
+  .rivals-grid,
+  .idols-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .rivals-grid,
+  .idols-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 480px) {
   .rivals-grid,
   .idols-grid {
     grid-template-columns: 1fr;
-    justify-content: stretch;
   }
 }
