@@ -10,6 +10,8 @@ from sqlalchemy.orm import Session
 from app.models import Match, StandingEntry, Team
 from app.models.enums import MatchStatus
 
+from app.config import CURRENT_TOURNAMENT, ANNUAL_TABLE_LABEL, AVERAGE_TABLE_LABEL
+
 # Orden visual del rondó en la landing (sentido horario desde arriba)
 LANDING_TEAM_SLUGS: list[str] = [
     "boca",
@@ -99,6 +101,65 @@ def get_zone_standings_for_team(
         .join(Team)
     ).all()
 
+def get_available_seasons_for_team(
+    db: Session,
+    team_id: int,
+    competition: str = "Liga Profesional",
+) -> list[str]:
+    """Temporadas con tabla final cargada, para el selector de años."""
+    rows = db.scalars(
+        select(StandingEntry.season)
+        .where(StandingEntry.team_id == team_id, StandingEntry.competition == competition)
+        .distinct()
+        .order_by(StandingEntry.season.desc())
+    ).all()
+    return list(rows)
+
+
+def get_standings_for_season(
+    db: Session,
+    season: str,
+    competition: str = "Liga Profesional",
+) -> list[StandingEntry]:
+    """Tabla final completa de una temporada específica (histórica)."""
+    return db.scalars(
+        select(StandingEntry)
+        .where(StandingEntry.season == season, StandingEntry.competition == competition)
+        .order_by(StandingEntry.position.asc())
+        .join(Team)
+    ).all()
+
+
+def get_dashboard_tables(db: Session, team: Team, season: str) -> dict[str, list[StandingEntry]]:
+    """Las 3 tablas del dashboard: torneo actual (zona propia), anual, promedios."""
+    torneo = get_zone_standings_for_team(db, team.id, season, CURRENT_TOURNAMENT)
+
+    anual = db.scalars(
+        select(StandingEntry)
+        .where(StandingEntry.competition == ANNUAL_TABLE_LABEL)
+        .order_by(StandingEntry.position.asc())
+        .join(Team)
+    ).all()
+
+    promedios = db.scalars(
+        select(StandingEntry)
+        .where(StandingEntry.competition == AVERAGE_TABLE_LABEL)
+        .order_by(StandingEntry.position.asc())
+        .join(Team)
+    ).all()
+
+    return {"torneo": torneo, "anual": anual, "promedios": promedios}
+
+
+def get_available_seasons_for_team(db: Session, team_id: int, competition: str = "Liga Profesional") -> list[str]:
+    """Temporadas con standings cargados para el selector del frontend."""
+    rows = db.scalars(
+        select(StandingEntry.season)
+        .where(StandingEntry.team_id == team_id, StandingEntry.competition == competition)
+        .distinct()
+        .order_by(StandingEntry.season.desc())
+    ).all()
+    return list(rows)
 
 def get_upcoming_matches_for_team(
     db: Session,

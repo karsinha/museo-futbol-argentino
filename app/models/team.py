@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from app.models.idol import Idol
     from app.models.kit import Kit
     from app.models.match import Match
+    from app.models.palmares import PalmaresEntry 
     from app.models.player import Player
     from app.models.rivalry import Rivalry
     from app.models.stadium import Stadium
@@ -59,6 +60,10 @@ class Team(Base):
         uselist=False,
     )
     trophies: Mapped[list[Trophy]] = relationship(
+        back_populates="team",
+        cascade="all, delete-orphan",
+    )
+    palmares_entries: Mapped[list[PalmaresEntry]] = relationship(  # NUEVO
         back_populates="team",
         cascade="all, delete-orphan",
     )

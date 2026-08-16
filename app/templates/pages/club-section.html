@@ -176,21 +176,83 @@
         </article>
 
       {% elif section == "trophies" %}
-        <article class="history-panel">
-          <div class="panel__header"><span>Títulos</span><span class="panel__tag">Palmarés</span></div>
-          {% if team.trophies %}
-            <ul class="history-list">
-              {% for trophy in team.trophies | sort(attribute="year", reverse=True) %}
-                <li>
-                  <strong>{{ trophy.name }}</strong>
-                  <span>{{ trophy.year }} · {{ trophy.competition }}</span>
-                </li>
+<article class="history-panel">
+  <div class="panel__header"><span>Títulos</span><span class="panel__tag">Palmarés</span></div>
+
+  <div class="trophies-layout">
+    {# Columna izquierda: badges + lista de títulos #}
+    <div>
+      {% if team.palmares_entries %}
+        <div class="palmares-summary">
+          {% for entry in team.palmares_entries %}
+          <div class="palmares-badge">
+            <span class="palmares-badge__competition">{{ entry.competition }}</span>
+            <div class="palmares-badge__stats">
+              <span class="palmares-badge__champion">🏆 {{ entry.champion_count }}</span>
+              <span class="palmares-badge__runner-up">🥈 {{ entry.runner_up_count }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% if team.trophies %}
+        <ul class="history-list">
+          {% for trophy in team.trophies | sort(attribute="year", reverse=True) %}
+            <li>
+              <strong>{{ trophy.name }}</strong>
+              <span>{{ trophy.year }} · {{ trophy.competition }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-museum-muted">Sin títulos cargados.</p>
+      {% endif %}
+    </div>
+
+    {# Columna derecha: tabla histórica por año #}
+    <div class="panel">
+      <div class="panel__header"><span>Tabla histórica</span></div>
+
+      {% if available_seasons %}
+        <div class="section-tabs">
+          {% for s in available_seasons %}
+            <a href="?season={{ s }}" class="section-tab {% if s == selected_season %}is-active{% endif %}">{{ s }}</a>
+          {% endfor %}
+        </div>
+
+        {% if standings_for_season %}
+        <div class="standings-table-wrap">
+          <table class="standings-table">
+            <thead>
+              <tr><th class="pos-col">#</th><th class="team-col">Equipo</th><th>PJ</th><th>PTS</th></tr>
+            </thead>
+            <tbody>
+              {% for row in standings_for_season %}
+              <tr class="{% if row.team_id == team.id %}is-current-team{% endif %}">
+                <td class="pos-cell">{{ row.position }}</td>
+                <td class="team-cell">
+                  <div class="team-cell__inner">
+                    {% if row.team and row.team.shield_path %}
+                      <img src="{{ url_for('static', path=row.team.shield_path) }}" alt="">
+                    {% endif %}
+                    <span>{{ row.team.name if row.team else '' }}</span>
+                  </div>
+                </td>
+                <td>{{ row.played }}</td>
+                <td class="pts-cell"><strong>{{ row.points }}</strong></td>
+              </tr>
               {% endfor %}
-            </ul>
-          {% else %}
-            <p class="text-museum-muted">Sin títulos cargados.</p>
-          {% endif %}
-        </article>
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+      {% else %}
+        <p class="text-museum-muted">Sin tablas históricas cargadas.</p>
+      {% endif %}
+    </div>
+  </div>
+</article>
 
       {% elif section == "international" %}
         <article class="history-panel">

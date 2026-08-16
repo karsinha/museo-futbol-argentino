@@ -60,6 +60,110 @@
         </div>
       </section>
 
+      {# Dashboard Stats — teasers, cada uno linkea a su página detallada #}
+      <section class="club-dashboard">
+        <div class="club-dashboard__grid">
+          <a href="{{ url_for('club_trophies', slug=team.slug) }}" class="stat-card stat-card--gold stat-card--link">
+            <span class="stat-card__label">Títulos</span>
+            <strong>{{ trophies_count }}</strong>
+            <small>Ver palmarés completo →</small>
+          </a>
+
+          <a href="{{ url_for('club_squad', slug=team.slug) }}" class="stat-card stat-card--link">
+            <span class="stat-card__label">Jugadores</span>
+            <strong>{{ players_count }}</strong>
+            <small>Ver plantel completo →</small>
+          </a>
+
+          <a href="{{ url_for('club_idols', slug=team.slug) }}" class="stat-card stat-card--link">
+            <span class="stat-card__label">Ídolos</span>
+            <strong>{{ idols_count }}</strong>
+            <small>Ver galería de ídolos →</small>
+          </a>
+
+          <a href="{{ url_for('club_rivals', slug=team.slug) }}" class="stat-card stat-card--link">
+            <span class="stat-card__label">Rivales</span>
+            <strong>{{ team.rivalries | length }}</strong>
+            <small>Ver historial completo →</small>
+          </a>
+        </div>
+      </section>
+
+      {# Tablas de posiciones — toggle entre torneo actual / anual / promedios #}
+      {% if tables.torneo or tables.anual or tables.promedios %}
+      <section class="standings-block">
+        <div class="standings-header">
+          <div>
+            <p class="club-kicker">Actualidad</p>
+            <h2>Tablas de posiciones</h2>
+          </div>
+          <span class="standings-season">{{ season }}</span>
+        </div>
+
+        <div class="section-tabs" data-standings-tabs>
+          <button type="button" class="section-tab is-active" data-table="torneo">Torneo actual</button>
+          <button type="button" class="section-tab" data-table="anual">Tabla Anual</button>
+          <button type="button" class="section-tab" data-table="promedios">Promedios</button>
+        </div>
+
+        {% for key, rows in tables.items() %}
+        <div class="standings-table-wrap" data-standings-panel="{{ key }}" {% if not loop.first %}style="display:none;"{% endif %}>
+          {% if rows %}
+          <table class="standings-table">
+            <thead>
+              <tr>
+                <th class="pos-col">#</th>
+                <th class="team-col">Equipo</th>
+                <th>PJ</th>
+                {% if key == "promedios" %}
+                  <th>Prom.</th>
+                {% else %}
+                  <th>G</th>
+                  <th>E</th>
+                  <th>P</th>
+                  <th>GF</th>
+                  <th>GC</th>
+                  <th>DG</th>
+                {% endif %}
+                <th>PTS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in rows %}
+              <tr class="{% if row.team_id == team.id %}is-current-team{% endif %}">
+                <td class="pos-cell">{{ row.position }}</td>
+                <td class="team-cell">
+                  <div class="team-cell__inner">
+                    {% if row.team and row.team.shield_path %}
+                    <img src="{{ url_for('static', path=row.team.shield_path) }}" alt="Escudo de {{ row.team.name }}" />
+                    {% endif %}
+                    <span>{{ row.team.name if row.team else 'Club' }}</span>
+                  </div>
+                </td>
+                <td>{{ row.played }}</td>
+                {% if key == "promedios" %}
+                  <td>{{ "%.2f"|format(row.average) if row.average else "-" }}</td>
+                {% else %}
+                  <td>{{ row.won }}</td>
+                  <td>{{ row.drawn }}</td>
+                  <td>{{ row.lost }}</td>
+                  <td>{{ row.goals_for }}</td>
+                  <td>{{ row.goals_against }}</td>
+                  <td>{{ row.goal_difference }}</td>
+                {% endif %}
+                <td class="pts-cell"><strong>{{ row.points }}</strong></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+            <p class="text-museum-muted" style="padding: 1rem;">Sin datos cargados para esta tabla.</p>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </section>
+      {% endif %}
+
       {# Próximo partido + temporizador #}
       {% if next_match %}
       {% set opponent = next_match.away_team if next_match.home_team_id == team.id else next_match.home_team %}
@@ -99,90 +203,6 @@
             <div class="timer-unit"><strong id="timer-minutes">--</strong><span>min</span></div>
             <div class="timer-unit"><strong id="timer-seconds">--</strong><span>seg</span></div>
           </div>
-        </div>
-      </section>
-      {% endif %}
-
-      {# Dashboard Stats — teasers, cada uno linkea a su página detallada #}
-      <section class="club-dashboard">
-        <div class="club-dashboard__grid">
-          <a href="{{ url_for('club_trophies', slug=team.slug) }}" class="stat-card stat-card--gold stat-card--link">
-            <span class="stat-card__label">Títulos</span>
-            <strong>{{ trophies_count }}</strong>
-            <small>Ver palmarés completo →</small>
-          </a>
-
-          <a href="{{ url_for('club_squad', slug=team.slug) }}" class="stat-card stat-card--link">
-            <span class="stat-card__label">Jugadores</span>
-            <strong>{{ players_count }}</strong>
-            <small>Ver plantel completo →</small>
-          </a>
-
-          <a href="{{ url_for('club_idols', slug=team.slug) }}" class="stat-card stat-card--link">
-            <span class="stat-card__label">Ídolos</span>
-            <strong>{{ idols_count }}</strong>
-            <small>Ver galería de ídolos →</small>
-          </a>
-
-          <a href="{{ url_for('club_rivals', slug=team.slug) }}" class="stat-card stat-card--link">
-            <span class="stat-card__label">Rivales</span>
-            <strong>{{ team.rivalries | length }}</strong>
-            <small>Ver historial completo →</small>
-          </a>
-        </div>
-      </section>
-
-      {# Tabla de posiciones — SOLO la zona del equipo #}
-      {% if zone_standings %}
-      <section class="standings-block">
-        <div class="standings-header">
-          <div>
-            <p class="club-kicker">Actualidad</p>
-            <h2>{{ competition }} · Zona {{ zone_standings[0].zone }}</h2>
-          </div>
-          <span class="standings-season">{{ season }}</span>
-        </div>
-
-        <div class="standings-table-wrap">
-          <table class="standings-table">
-            <thead>
-              <tr>
-                <th class="pos-col">#</th>
-                <th class="team-col">Equipo</th>
-                <th>PJ</th>
-                <th>G</th>
-                <th>E</th>
-                <th>P</th>
-                <th>GF</th>
-                <th>GC</th>
-                <th>DG</th>
-                <th>PTS</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for row in zone_standings %}
-              <tr class="{% if row.team_id == team.id %}is-current-team{% endif %}">
-                <td class="pos-cell">{{ row.position }}</td>
-                <td class="team-cell">
-                  <div class="team-cell__inner">
-                    {% if row.team and row.team.shield_path %}
-                    <img src="{{ url_for('static', path=row.team.shield_path) }}" alt="Escudo de {{ row.team.name }}" />
-                    {% endif %}
-                    <span>{{ row.team.name if row.team else 'Club' }}</span>
-                  </div>
-                </td>
-                <td>{{ row.played }}</td>
-                <td>{{ row.won }}</td>
-                <td>{{ row.drawn }}</td>
-                <td>{{ row.lost }}</td>
-                <td>{{ row.goals_for }}</td>
-                <td>{{ row.goals_against }}</td>
-                <td>{{ row.goal_difference }}</td>
-                <td class="pts-cell"><strong>{{ row.points }}</strong></td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
         </div>
       </section>
       {% endif %}
@@ -258,5 +278,18 @@
     tick();
     setInterval(tick, 1000);
   })();
+</script>
+
+<script>
+  document.querySelectorAll('[data-standings-tabs] .section-tab').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-standings-tabs] .section-tab').forEach((b) => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      const target = btn.dataset.table;
+      document.querySelectorAll('[data-standings-panel]').forEach((panel) => {
+        panel.style.display = panel.dataset.standingsPanel === target ? '' : 'none';
+      });
+    });
+  });
 </script>
 {% endblock %}

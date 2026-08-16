@@ -1514,3 +1514,102 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* === PALMARÉS: badges de campeón/subcampeón === */
+.palmares-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.palmares-badge {
+  padding: 1rem 1.1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, rgba(201, 162, 39, 0.08), rgba(255, 255, 255, 0.02));
+}
+
+.palmares-badge__competition {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9ca3af;
+  margin-bottom: 0.6rem;
+}
+
+.palmares-badge__stats {
+  display: flex;
+  gap: 1.2rem;
+}
+
+.palmares-badge__stats span {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f3f4f6;
+}
+
+.palmares-badge__runner-up {
+  color: #d1d5db !important;
+}
+
+@media (max-width: 820px) {
+  .palmares-summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* === TÍTULOS: layout de dos columnas === */
+.trophies-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(280px, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 820px) {
+  .trophies-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Badges más compactos, 2 por fila (como la infobox de Wikipedia pero con más aire) */
+.palmares-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.palmares-badge {
+  padding: 0.9rem 1rem;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, rgba(201, 162, 39, 0.08), rgba(255, 255, 255, 0.02));
+}
+
+.palmares-badge__competition {
+  display: block;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9ca3af;
+  margin-bottom: 0.5rem;
+}
+
+.palmares-badge__stats {
+  display: flex;
+  gap: 1rem;
+}
+
+.palmares-badge__stats span {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f3f4f6;
+}
+
+.palmares-badge__runner-up {
+  color: #d1d5db !important;
+}

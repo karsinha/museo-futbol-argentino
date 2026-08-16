@@ -7,6 +7,7 @@ from app.models.base import Base
 from app.models.idol import Idol
 from app.models.kit import Kit
 from app.models.match import Match
+from app.models.palmares import PalmaresEntry  
 from app.models.player import Player
 from app.models.rivalry import Rivalry
 from app.models.stadium import Stadium
@@ -25,4 +26,5 @@ __all__ = [
     "Player",
     "StandingEntry",
     "Idol",
+    "PalmaresEntry",
 ]

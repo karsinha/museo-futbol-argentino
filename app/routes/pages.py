@@ -14,7 +14,6 @@ from app.templating import templates
 router = APIRouter(tags=["pages"])
 
 SECTION_TITLES = {
-    "history": "Historia",
     "rivals": "Rivales",
     "stadium": "Estadio",
     "trophies": "Títulos",
@@ -47,7 +46,6 @@ async def club_page(
     slug: str,
     db: Session = Depends(get_db),
 ) -> HTMLResponse:
-    """Dashboard del club: info de temporada actual, no historial detallado."""
     team = team_service.get_team_by_slug(db, slug)
     if team is None:
         raise HTTPException(status_code=404, detail="Club no encontrado")
@@ -57,10 +55,8 @@ async def club_page(
     players_count = len(team.players)
     idols_count = len(team.idols)
 
-    season = "2025"
-    competition = "Liga Profesional"
-
-    zone_standings = team_service.get_zone_standings_for_team(db, team.id, season, competition)
+    season = CURRENT_SEASON
+    tables = team_service.get_dashboard_tables(db, team, season)
     next_match = team_service.get_next_match_for_team(db, team.id)
     upcoming_matches = team_service.get_upcoming_matches_for_team(db, team.id, limit=5)
 
@@ -74,11 +70,10 @@ async def club_page(
             "trophies_count": trophies_count,
             "players_count": players_count,
             "idols_count": idols_count,
-            "zone_standings": zone_standings,
+            "tables": tables,
             "next_match": next_match,
             "upcoming_matches": upcoming_matches,
             "season": season,
-            "competition": competition,
             "active_section": "dashboard",
         },
     )
@@ -102,12 +97,7 @@ def _section_response(request: Request, team, section: str) -> HTMLResponse:
     )
 
 
-@router.get("/club/{slug}/history", response_class=HTMLResponse, name="club_history")
-async def club_history(request: Request, slug: str, db: Session = Depends(get_db)) -> HTMLResponse:
-    team = team_service.get_team_by_slug(db, slug)
-    if team is None:
-        raise HTTPException(status_code=404, detail="Club no encontrado")
-    return _section_response(request, team, "history")
+
 
 
 @router.get("/club/{slug}/rivals", response_class=HTMLResponse, name="club_rivals")
@@ -127,11 +117,37 @@ async def club_stadium(request: Request, slug: str, db: Session = Depends(get_db
 
 
 @router.get("/club/{slug}/trophies", response_class=HTMLResponse, name="club_trophies")
-async def club_trophies(request: Request, slug: str, db: Session = Depends(get_db)) -> HTMLResponse:
+async def club_trophies(
+    request: Request,
+    slug: str,
+    season: str | None = None,
+    db: Session = Depends(get_db),
+) -> HTMLResponse:
     team = team_service.get_team_by_slug(db, slug)
     if team is None:
         raise HTTPException(status_code=404, detail="Club no encontrado")
-    return _section_response(request, team, "trophies")
+
+    available_seasons = team_service.get_available_seasons_for_team(db, team.id)
+    selected_season = season or (available_seasons[0] if available_seasons else None)
+    standings_for_season = (
+        team_service.get_standings_for_season(db, selected_season)
+        if selected_season else []
+    )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="pages/club-section.html",
+        context={
+            "app_name": APP_NAME,
+            "team": team,
+            "section": "trophies",
+            "active_section": "trophies",
+            "title": SECTION_TITLES["trophies"],
+            "available_seasons": available_seasons,
+            "selected_season": selected_season,
+            "standings_for_season": standings_for_season,
+        },
+    )
 
 
 @router.get("/club/{slug}/international", response_class=HTMLResponse, name="club_international")

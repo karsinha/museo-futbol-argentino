@@ -30,6 +30,7 @@ class StandingEntry(Base):
     season: Mapped[str] = mapped_column(index=True)
     competition: Mapped[str] = mapped_column(index=True)
     zone: Mapped[str | None] = mapped_column(default=None)  # A, B, etc.
+    average: Mapped[float | None] = mapped_column(nullable=True)  # solo se usa en Tabla de Promedios
 
     position: Mapped[int] = mapped_column(index=True)
     played: Mapped[int] = mapped_column(default=0)
